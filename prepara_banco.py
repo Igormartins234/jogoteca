@@ -1,158 +1,93 @@
 import mysql.connector
 from mysql.connector import errorcode
 
-print("Conectando ao banco de dados...")
-
+print("Conectando...")
 try:
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="igor",
-        password="123456"
-    )
-
-    print("Conectado com sucesso!")
-
+      conn = mysql.connector.connect(
+            host='localhost',
+            user='igor',
+            password='123456'
+      )
 except mysql.connector.Error as err:
-    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-        print("Existe algo errado com o usuário ou senha.")
-    else:
-        print(err)
-
-    exit()
-
+      if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print('Existe algo errado no nome de usuário ou senha')
+      else:
+            print(err)
 
 cursor = conn.cursor()
 
-# Apaga o banco caso ele já exista
-cursor.execute("DROP DATABASE IF EXISTS jogoteca")
+cursor.execute("DROP DATABASE IF EXISTS `jogoteca`;")
 
-# Cria o banco novamente
-cursor.execute("CREATE DATABASE jogoteca")
+cursor.execute("CREATE DATABASE `jogoteca`;")
 
-# Seleciona o banco
-cursor.execute("USE jogoteca")
+cursor.execute("USE `jogoteca`;")
 
-
-# =========================
-# CRIAÇÃO DAS TABELAS
-# =========================
-
+# criando tabelas
 TABLES = {}
+TABLES['Jogos'] = ('''
+      CREATE TABLE `jogos` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `nome` varchar(50) NOT NULL,
+      `categoria` varchar(40) NOT NULL,
+      `console` varchar(20) NOT NULL,
+      PRIMARY KEY (`id`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;''')
 
-TABLES['jogos'] = ('''
-    CREATE TABLE `jogos` (
-        `id` int(11) NOT NULL AUTO_INCREMENT,
-        `nome` varchar(50) NOT NULL,
-        `categoria` varchar(40) NOT NULL,
-        `console` varchar(20) NOT NULL,
-        PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-''')
+TABLES['Usuarios'] = ('''
+      CREATE TABLE `usuarios` (
+      `nome` varchar(20) NOT NULL,
+      `nickname` varchar(8) NOT NULL,
+      `senha` varchar(100) NOT NULL,
+      PRIMARY KEY (`nickname`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;''')
 
-TABLES['usuarios'] = ('''
-    CREATE TABLE `usuarios` (
-        `nome` varchar(20) NOT NULL,
-        `nickname` varchar(8) NOT NULL,
-        `senha` varchar(100) NOT NULL,
-        PRIMARY KEY (`nickname`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-''')
-
-
-# Cria as tabelas
 for tabela_nome in TABLES:
-    tabela_sql = TABLES[tabela_nome]
-
-    try:
-        print(
-            "Criando tabela {}: ".format(tabela_nome),
-            end=''
-        )
-
-        cursor.execute(tabela_sql)
-
-    except mysql.connector.Error as err:
-
-        if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-            print("Já existe")
-
-        else:
-            print(err.msg)
-
-    else:
-        print("OK")
+      tabela_sql = TABLES[tabela_nome]
+      try:
+            print('Criando tabela {}:'.format(tabela_nome), end=' ')
+            cursor.execute(tabela_sql)
+      except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+                  print('Já existe')
+            else:
+                  print(err.msg)
+      else:
+            print('OK')
 
 
-# =========================
-# CADASTRO DOS USUÁRIOS
-# =========================
-
-usuario_sql = """
-    INSERT INTO usuarios
-    (nome, nickname, senha)
-    VALUES (%s, %s, %s)
-"""
-
+# inserindo usuarios
+usuario_sql = 'INSERT INTO usuarios (nome, nickname, senha) VALUES (%s, %s, %s)'
 usuarios = [
-    ("Lucas", "lucas", "123"),
-    ("João", "joao", "321"),
-    ("Maria", "maria", "abc"),
+      ("Bruno Divino", "BD", "alohomora"),
+      ("Camila Ferreira", "Mila", "paozinho"),
+      ("Guilherme Louro", "Cake", "python_eh_vida")
 ]
-
 cursor.executemany(usuario_sql, usuarios)
 
-# Confirma os usuários no banco
-conn.commit()
-
-
-# Mostra os usuários cadastrados
-cursor.execute("SELECT * FROM usuarios")
-
-print("Usuários cadastrados:")
-
+cursor.execute('select * from jogoteca.usuarios')
+print(' -------------  Usuários:  -------------')
 for user in cursor.fetchall():
     print(user[1])
 
-
-# =========================
-# CADASTRO DOS JOGOS
-# =========================
-
-jogos_sql = """
-    INSERT INTO jogos
-    (nome, categoria, console)
-    VALUES (%s, %s, %s)
-"""
-
+# inserindo jogos
+jogos_sql = 'INSERT INTO jogos (nome, categoria, console) VALUES (%s, %s, %s)'
 jogos = [
-    ("Tetris", "Puzzle", "Atari"),
-    ("God of War", "Hack n Slash", "PS2"),
-    ("Mortal Kombat", "Luta", "PS2"),
-    ("Valorant", "FPS", "PC"),
-    ("Minecraft", "Sandbox", "PS4"),
+      ('Tetris', 'Puzzle', 'Atari'),
+      ('God of War', 'Hack n Slash', 'PS2'),
+      ('Mortal Kombat', 'Luta', 'PS2'),
+      ('Valorant', 'FPS', 'PC'),
+      ('Crash Bandicoot', 'Hack n Slash', 'PS2'),
+      ('Need for Speed', 'Corrida', 'PS2'),
 ]
-
 cursor.executemany(jogos_sql, jogos)
 
-# IMPORTANTE:
-# Confirma os jogos no banco
-conn.commit()
-
-
-# Mostra os jogos cadastrados
-cursor.execute("SELECT * FROM jogos")
-
-print("Jogos cadastrados:")
-
+cursor.execute('select * from jogoteca.jogos')
+print(' -------------  Jogos:  -------------')
 for jogo in cursor.fetchall():
     print(jogo[1])
 
-
-# =========================
-# FECHANDO A CONEXÃO
-# =========================
+# commitando se não nada tem efeito
+conn.commit()
 
 cursor.close()
 conn.close()
-
-print("Banco de dados preparado com sucesso!")
