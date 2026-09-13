@@ -1,34 +1,137 @@
 <!DOCTYPE html>
+
 <html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Jogoteca</title>
+        <title>{% if titulo %}{{ titulo }} - {% endif %}GameHub</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
     </head>
-    <body>
+
+```
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
 
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <ul id="messages" class="list-unstyled">
-                    {% for message in messages %}
-                        <li class="alert alert-success">{{ message }}</li>
-                    {% endfor %}
-                    </ul>
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                GameHub
+            </a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="menu">
+
+                <ul class="navbar-nav mr-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            Início
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('explorar') }}">
+                            Explorar
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('biblioteca') }}">
+                            Minha Biblioteca
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('diario') }}">
+                            Diário
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('comunidade') }}">
+                            Comunidade
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('estatisticas') }}">
+                            Estatísticas
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('novo') }}">
+                            Adicionar Jogo
+                        </a>
+                    </li>
+
+                </ul>
+
+                {% if session.get('usuario_logado') %}
+
+                <a
+                    class="navbar-text mr-3"
+                    href="{{ url_for('perfil', nickname=session['usuario_logado']) }}">
+
+                    @{{ session['usuario_logado'] }}
+
+                </a>
+
+                <a class="btn btn-outline-light" href="{{ url_for('logout') }}">
+                    Sair
+                </a>
+
+                {% else %}
+
+                <a class="btn btn-outline-light" href="{{ url_for('login') }}">
+                    Entrar
+                </a>
+
                 {% endif %}
-            {% endwith %}
 
-          <div class="page-header">
-              <h1>{{ titulo }}</h1>
-          </div>
+            </div>
 
-            {% block conteudo %}{% endblock %}
-
-
-            <script type="text/javascript" src="{{ url_for('static', filename='jquery.js') }}"></script>
-            <script type="text/javascript" src="{{ url_for('static', filename='app.js') }}"></script>
         </div>
-    </body>
+    </nav>
+
+    <div class="container">
+
+        {% with messages = get_flashed_messages() %}
+
+            {% if messages %}
+
+                <ul id="messages" class="list-unstyled">
+
+                    {% for message in messages %}
+
+                        <li class="alert alert-success">
+                            {{ message }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            {% endif %}
+
+        {% endwith %}
+
+        <div class="page-header">
+            <h1>{{ titulo }}</h1>
+        </div>
+
+        {% block conteudo %}{% endblock %}
+
+    </div>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+
+
 </html>

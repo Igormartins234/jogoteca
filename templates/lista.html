@@ -1,32 +1,206 @@
 {% extends "template.html" %}
 {% block conteudo %}
 
-        <a class="btn btn-primary" href="{{ url_for('login') }}">Login</a>
-        <a class="btn btn-danger" href="{{ url_for('logout') }}">Logout</a>
-        <a class="btn btn-primary" href="{{ url_for('novo') }}">Novo Jogo</a>
+<h2>Minha Biblioteca</h2>
 
-        <table class="table table-striped table-responsive table-bordered">
-            <thead class="thead-default">
-                <tr>
-                    <th>Nome</th>
-                    <th>Categoria</th>
-                    <th>Console</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for jogo in jogos %}
-                <tr>
-                    <td>{{ jogo.nome }}</td>
-                    <td>{{ jogo.categoria }}</td>
-                    <td>{{ jogo.console }}</td>
-                    <td>
-                        <a href="{{ url_for('editar', id=jogo.id) }}">Editar</a>
-                        <a href="{{ url_for('deletar', id=jogo.id) }}">Deletar</a>
-                    </td>
-                </tr>
-                {% endfor %}
+<p>
+    Seus jogos e seu progresso.
+</p>
 
-            </tbody>
-        </table>
+{% if biblioteca %}
+
+    {% for item in biblioteca %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card h-100">
+
+                {% if capas_biblioteca[item.jogo_id] %}
+
+                    <img
+                        src="{{ url_for('imagem', nome_arquivo=capas_biblioteca[item.jogo_id]) }}"
+                        class="card-img-top"
+                        alt="Capa de {{ item.jogo.nome }}"
+                        style="height: 300px; object-fit: cover;"
+                    >
+
+                {% endif %}
+
+                <div class="card-body">
+
+                    <h3>
+
+                        <a href="{{ url_for('jogo', id=item.jogo.id) }}">
+
+                            {{ item.jogo.nome }}
+
+                        </a>
+
+                    </h3>
+
+                    <p>
+                        {{ item.jogo.categoria }}
+                    </p>
+
+                    <p>
+                        {{ item.jogo.console }}
+                    </p>
+
+                    {% if item.status == 'jogando' %}
+
+                        <span class="badge badge-primary">
+                            Jogando
+                        </span>
+
+                    {% elif item.status == 'concluido' %}
+
+                        <span class="badge badge-success">
+                            Concluído
+                        </span>
+
+                    {% elif item.status == 'quero_jogar' %}
+
+                        <span class="badge badge-secondary">
+                            Quero jogar
+                        </span>
+
+                    {% elif item.status == 'pausado' %}
+
+                        <span class="badge badge-warning">
+                            Pausado
+                        </span>
+
+                    {% elif item.status == 'abandonado' %}
+
+                        <span class="badge badge-danger">
+                            Abandonado
+                        </span>
+
+                    {% endif %}
+
+                    {% if item.favorito %}
+
+                        <span class="badge badge-warning">
+                            ⭐ Favorito
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <h4>
+        Sua biblioteca está vazia.
+    </h4>
+
+    <p>
+        Descubra um jogo abaixo e adicione à sua biblioteca.
+    </p>
+
+{% endif %}
+
+<h2>Descobrir jogos</h2>
+
+<p>
+    Explore o catálogo disponível no GameHub.
+</p>
+
+{% for jogo in jogos %}
+
+    <div class="col-md-4 mb-4">
+
+        <div class="card h-100">
+
+            {% if capas_jogos[jogo.id] %}
+
+                <img
+                    src="{{ url_for('imagem', nome_arquivo=capas_jogos[jogo.id]) }}"
+                    class="card-img-top"
+                    alt="Capa de {{ jogo.nome }}"
+                    style="height: 300px; object-fit: cover;"
+                >
+
+            {% endif %}
+
+            <div class="card-body">
+
+                <h3>
+
+                    <a href="{{ url_for('jogo', id=jogo.id) }}">
+
+                        {{ jogo.nome }}
+
+                    </a>
+
+                </h3>
+
+                <p>
+                    {{ jogo.categoria }}
+                </p>
+
+                <p>
+                    {{ jogo.console }}
+                </p>
+
+                <a
+                    href="{{ url_for('jogo', id=jogo.id) }}"
+                    class="btn btn-primary">
+
+                    Ver jogo
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endfor %}
+
+<h2>GameHub</h2>
+
+<p>
+    Sua biblioteca de jogos, suas avaliações e sua comunidade.
+</p>
+
+<a
+    class="btn btn-primary"
+    href="{{ url_for('explorar') }}">
+
+    Explorar jogos
+
+</a>
+
+<a
+    class="btn btn-primary"
+    href="{{ url_for('novo') }}">
+
+    + Cadastrar jogo
+
+</a>
+
+<a
+    class="btn btn-secondary"
+    href="{{ url_for('perfil', nickname=session['usuario_logado']) }}">
+
+    Meu perfil
+
+</a>
+
+<a
+    class="btn btn-danger"
+    href="{{ url_for('logout') }}">
+
+    Sair
+
+</a>
+
 {% endblock %}

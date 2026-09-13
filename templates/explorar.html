@@ -1,0 +1,188 @@
+{% extends "template.html" %}
+{% block conteudo %}
+
+<div class="container">
+
+```
+<h2>Descobrir jogos</h2>
+
+<p>
+    Explore o catálogo disponível no GameHub.
+</p>
+
+<form method="GET" action="{{ url_for('explorar') }}">
+
+    <div class="row">
+
+        <div class="col-md-5">
+
+            <div class="form-group">
+
+                <label for="q">
+                    Pesquisar jogo
+                </label>
+
+                <input
+                    type="text"
+                    id="q"
+                    name="q"
+                    class="form-control"
+                    placeholder="Digite o nome do jogo..."
+                    value="{{ busca }}">
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="form-group">
+
+                <label for="categoria">
+                    Categoria
+                </label>
+
+                <select
+                    id="categoria"
+                    name="categoria"
+                    class="form-control">
+
+                    <option value="">
+                        Todas
+                    </option>
+
+                    {% for item in categorias %}
+
+                        <option
+                            value="{{ item }}"
+                            {% if categoria_selecionada == item %}selected{% endif %}>
+
+                            {{ item }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="form-group">
+
+                <label for="console">
+                    Console
+                </label>
+
+                <select
+                    id="console"
+                    name="console"
+                    class="form-control">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    {% for item in consoles %}
+
+                        <option
+                            value="{{ item }}"
+                            {% if console_selecionado == item %}selected{% endif %}>
+
+                            {{ item }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-1">
+
+            <label>
+                &nbsp;
+            </label>
+
+            <button
+                type="submit"
+                class="btn btn-primary btn-block">
+
+                Buscar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
+
+<hr>
+
+{% if jogos %}
+
+    <div class="row">
+
+        {% for jogo in jogos %}
+
+            <div class="col-md-4">
+
+                <div class="card mb-4">
+
+                    <div class="card-body">
+
+                        <h3 class="card-title">
+                            {{ jogo.nome }}
+                        </h3>
+
+                        <p class="card-text">
+
+                            <strong>Categoria:</strong>
+                            {{ jogo.categoria }}
+
+                            <br>
+
+                            <strong>Console:</strong>
+                            {{ jogo.console }}
+
+                        </p>
+
+                        <a
+                            href="{{ url_for('jogo', id=jogo.id) }}"
+                            class="btn btn-primary">
+
+                            Ver jogo
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="alert alert-info">
+
+        Nenhum jogo encontrado.
+
+    </div>
+
+{% endif %}
+```
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "template.html" %}
+{% block conteudo %}
+
+<a
+    href="{{ url_for('biblioteca') }}"
+    class="btn btn-default">
+
+    Todos
+
+</a>
+
+<a
+    href="{{ url_for('biblioteca', status='quero_jogar') }}"
+    class="btn btn-default">
+
+    Quero jogar
+
+</a>
+
+<a
+    href="{{ url_for('biblioteca', status='jogando') }}"
+    class="btn btn-default">
+
+    Jogando
+
+</a>
+
+<a
+    href="{{ url_for('biblioteca', status='concluido') }}"
+    class="btn btn-default">
+
+    Concluídos
+
+</a>
+
+<a
+    href="{{ url_for('biblioteca', favoritos=1) }}"
+    class="btn btn-default">
+
+    Favoritos
+
+</a>
+
+{% if biblioteca %}
+
+    <div class="row">
+
+        {% for item in biblioteca %}
+
+            <div class="col-md-4">
+
+                <div class="panel panel-default">
+
+                    {% if capas_biblioteca[item.jogo_id] %}
+
+                        <img
+                            src="{{ url_for('imagem', nome_arquivo=capas_biblioteca[item.jogo_id]) }}"
+                            alt="{{ item.jogo.nome }}"
+                            style="width: 100%; height: 350px; object-fit: cover;"
+                        >
+
+                    {% endif %}
+
+                    <div class="panel-body">
+
+                        <h3>
+                            {{ item.jogo.nome }}
+                        </h3>
+
+                        <p>
+                            {{ item.jogo.categoria }}
+                        </p>
+
+                        <p>
+                            {{ item.jogo.console }}
+                        </p>
+
+                        <p>
+                            <strong>Status:</strong>
+
+                            {% if item.status == 'quero_jogar' %}
+                                Quero jogar
+                            {% elif item.status == 'jogando' %}
+                                Jogando
+                            {% elif item.status == 'concluido' %}
+                                Concluído
+                            {% elif item.status == 'pausado' %}
+                                Pausado
+                            {% elif item.status == 'abandonado' %}
+                                Abandonado
+                            {% else %}
+                                {{ item.status }}
+                            {% endif %}
+
+                        </p>
+
+                        {% if item.favorito %}
+
+                            <p>
+                                ★ Favorito
+                            </p>
+
+                        {% endif %}
+
+                        <a
+                            href="{{ url_for('jogo', id=item.jogo.id) }}"
+                            class="btn btn-primary">
+
+                            Ver jogo
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="alert alert-info">
+
+        Nenhum jogo encontrado nesse filtro.
+
+    </div>
+
+{% endif %}
+
+{% endblock %}
+

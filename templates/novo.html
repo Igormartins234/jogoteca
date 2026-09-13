@@ -1,35 +1,75 @@
 {% extends "template.html" %}
 {% block conteudo %}
-      <form class="formularioJogo" action="{{ url_for('criar') }}" method="post" enctype="multipart/form-data">
 
-        <figure class="img thumbnail col-md-4 formularioImagem">
-          <img class="img-fluid" src="{{ url_for('imagem', nome_arquivo='capa_padrao.jpg') }}">
-          <figcaption>
-            <label class="fileContainer">
-              Mudar Capa
-              <input type="file" name="arquivo" accept=".jpg">
-            </label>
-          </figcaption>
-        </figure>
+<div class="card">
 
-        <fieldset>
-          {{ form.csrf_token() }}
-          <div class="form-group inputBox">
-            {{ form.nome.label(class="form-label") }}
-            {{ form.nome(class="form-control") }}
-          </div>
-          <div class="form-group inputBox">
-            {{ form.categoria.label(class="form-label") }}
-            {{ form.categoria(class="form-control") }}
-          </div>
-          <div class="form-group inputBox">
-            {{ form.console.label(class="form-label") }}
-            {{ form.console(class="form-control") }}
-          </div>
-          <div class="form-group buttons>
+    <div class="card-body">
+
+        <h2>Adicionar jogo ao catálogo</h2>
+
+        <p>
+            Adicione um jogo que ainda não existe no GameHub.
+        </p>
+
+        <form
+            method="POST"
+            action="{{ url_for('criar') }}"
+            enctype="multipart/form-data">
+
+            {{ form.csrf_token }}
+
+            <div class="form-group">
+
+                {{ form.nome.label }}
+
+                {{ form.nome(class="form-control") }}
+
+            </div>
+
+            <div class="form-group">
+
+                {{ form.categoria.label }}
+
+                {{ form.categoria(class="form-control") }}
+
+            </div>
+
+            <div class="form-group">
+
+                {{ form.console.label }}
+
+                {{ form.console(class="form-control") }}
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="arquivo">
+                    Capa do jogo
+                </label>
+
+                <input
+                    type="file"
+                    name="arquivo"
+                    id="arquivo"
+                    class="form-control">
+
+            </div>
+
             {{ form.salvar(class="btn btn-primary") }}
-            <a class="btn btn-danger" href="{{ url_for('index') }}">Voltar</a>
-          </div>
-        </fieldset>
-      </form>
+
+            <a
+                href="{{ url_for('index') }}"
+                class="btn btn-secondary">
+
+                Cancelar
+
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
 {% endblock %}

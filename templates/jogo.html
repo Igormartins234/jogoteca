@@ -1,0 +1,338 @@
+{% extends "template.html" %}
+{% block conteudo %}
+
+<div class="container">
+
+<div class="row">
+
+    <div class="col-md-4">
+
+        <img
+            src="{{ url_for('imagem', nome_arquivo=capa_jogo) }}"
+            class="img-responsive img-thumbnail"
+            alt="{{ jogo.nome }}">
+
+    </div>
+
+    <div class="col-md-8">
+
+        <h1>{{ jogo.nome }}</h1>
+
+        <p>
+            <strong>Categoria:</strong>
+            {{ jogo.categoria }}
+        </p>
+
+        <p>
+            <strong>Console:</strong>
+            {{ jogo.console }}
+        </p>
+
+        <p>
+            <strong>{{ quantidade_jogadores }}</strong>
+            jogadores possuem este jogo
+        </p>
+
+        <hr>
+
+        <h3>Avaliação da comunidade</h3>
+
+        {% if avaliacoes %}
+
+            <h2>
+                ⭐ {{ "%.1f"|format(media) }}/5
+            </h2>
+
+            <p>
+                {{ avaliacoes|length }} avaliações
+            </p>
+
+        {% else %}
+
+            <p>
+                Ainda não existem avaliações.
+            </p>
+
+        {% endif %}
+
+        <hr>
+
+        {% if biblioteca %}
+
+            <h3>Minha Biblioteca</h3>
+
+            <form
+                method="POST"
+                action="{{ url_for('editar_biblioteca', id=jogo.id) }}">
+
+                {{ form_biblioteca.csrf_token }}
+
+                <div class="form-group">
+
+                    {{ form_biblioteca.status.label }}
+
+                    {{ form_biblioteca.status(
+                        class="form-control"
+                    ) }}
+
+                </div>
+
+                <div class="form-group">
+
+                    {{ form_biblioteca.favorito() }}
+
+                    {{ form_biblioteca.favorito.label }}
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary">
+
+                    Salvar biblioteca
+
+                </button>
+
+            </form>
+
+            <br>
+
+            <form
+                method="POST"
+                action="{{ url_for('remover_biblioteca', id=jogo.id) }}">
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}">
+
+                <button
+                    type="submit"
+                    class="btn btn-danger">
+
+                    Remover da biblioteca
+
+                </button>
+
+            </form>
+
+        {% else %}
+
+            <form
+                method="POST"
+                action="{{ url_for('adicionar_biblioteca', id=jogo.id) }}">
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}">
+
+                <button
+                    type="submit"
+                    class="btn btn-success">
+
+                    + Adicionar à minha biblioteca
+
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Minha avaliação</h2>
+
+<div class="card">
+
+    <div class="card-body">
+
+        {% if minha_avaliacao %}
+
+            <p>
+                Você já avaliou este jogo.
+            </p>
+
+            <p>
+                <strong>
+                    Nota: {{ minha_avaliacao.nota }}/5
+                </strong>
+            </p>
+
+            {% if minha_avaliacao.review %}
+
+                <p>
+                    {{ minha_avaliacao.review }}
+                </p>
+
+            {% endif %}
+
+            <hr>
+
+            <p>
+                Você pode atualizar sua avaliação abaixo.
+            </p>
+
+        {% endif %}
+
+        <form
+            method="POST"
+            action="{{ url_for('avaliar', id=jogo.id) }}">
+
+            {{ form_avaliacao.csrf_token }}
+
+            <div class="form-group">
+
+                {{ form_avaliacao.nota.label }}
+
+                {{ form_avaliacao.nota(
+                    class="form-control"
+                ) }}
+
+            </div>
+
+            <div class="form-group">
+
+                {{ form_avaliacao.review.label }}
+
+                {{ form_avaliacao.review(
+                    class="form-control",
+                    rows="4"
+                ) }}
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+
+                {% if minha_avaliacao %}
+                    Atualizar avaliação
+                {% else %}
+                    Publicar avaliação
+                {% endif %}
+
+            </button>
+
+        </form>
+
+        {% if minha_avaliacao %}
+
+            <br>
+
+            <form
+                method="POST"
+                action="{{ url_for('excluir_avaliacao', id=minha_avaliacao.id) }}">
+
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}">
+
+                <button
+                    type="submit"
+                    class="btn btn-danger">
+
+                    Excluir minha avaliação
+
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<br>
+
+<h2>Avaliações da comunidade</h2>
+
+{% if avaliacoes %}
+
+    {% for avaliacao in avaliacoes %}
+
+        <div class="card mb-3">
+
+            <div class="card-body">
+
+                <h4>
+                    <a
+                        href="{{ url_for('perfil', nickname=avaliacao.usuario.nickname) }}">
+
+                        @{{ avaliacao.usuario.nickname }}
+
+                    </a>
+                </h4>
+
+                <p>
+
+                    <strong>
+                        {% for estrela in range(avaliacao.nota) %}
+                            ⭐
+                        {% endfor %}
+                    </strong>
+
+                    <span>
+                        {{ avaliacao.nota }}/5
+                    </span>
+
+                </p>
+
+                {% if avaliacao.review %}
+
+                    <p>
+                        {{ avaliacao.review }}
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        <em>
+                            Este usuário não escreveu uma review.
+                        </em>
+                    </p>
+
+                {% endif %}
+
+                {% if session.get('usuario_id') == avaliacao.usuario_id %}
+
+                    <small>
+                        Esta é a sua avaliação.
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        Ainda não existem avaliações para este jogo.
+    </p>
+
+{% endif %}
+
+<br>
+
+<a
+    href="{{ url_for('explorar') }}"
+    class="btn btn-secondary">
+
+    Voltar para explorar
+
+</a>
+
+
+</div>
+
+{% endblock %}

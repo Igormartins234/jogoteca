@@ -1,0 +1,125 @@
+{% extends "template.html" %}
+{% block conteudo %}
+
+<div class="container">
+
+```
+<h1>Comunidade</h1>
+
+<p>
+    Veja o que os jogadores estão fazendo no Joteca.
+</p>
+
+<hr>
+
+{% if atividades %}
+
+    {% for atividade in atividades %}
+
+        <div class="card mb-3">
+
+            <div class="card-body">
+
+                <h4>
+
+                    <a
+                        href="{{ url_for('perfil', nickname=atividade.usuario.nickname) }}">
+
+                        @{{ atividade.usuario.nickname }}
+
+                    </a>
+
+                </h4>
+
+                {% if atividade.tipo == 'avaliacao' %}
+
+                    <p>
+                        avaliou
+                        <strong>
+                            <a
+                                href="{{ url_for('jogo', id=atividade.jogo.id) }}">
+
+                                {{ atividade.jogo.nome }}
+
+                            </a>
+                        </strong>
+                    </p>
+
+                    <p>
+
+                        {% for estrela in range(atividade.avaliacao.nota) %}
+                            ⭐
+                        {% endfor %}
+
+                    </p>
+
+                    <p>
+                        <strong>
+                            {{ atividade.avaliacao.nota }}/5
+                        </strong>
+                    </p>
+
+                    {% if atividade.avaliacao.review %}
+
+                        <p>
+                            "{{ atividade.avaliacao.review }}"
+                        </p>
+
+                    {% endif %}
+
+                {% elif atividade.tipo == 'biblioteca' %}
+
+                    <p>
+
+                        adicionou
+
+                        <strong>
+                            <a
+                                href="{{ url_for('jogo', id=atividade.jogo.id) }}">
+
+                                {{ atividade.jogo.nome }}
+
+                            </a>
+                        </strong>
+
+                        à biblioteca
+
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        {{ atividade.item.status }}
+                    </p>
+
+                    {% if atividade.item.favorito %}
+
+                        <p>
+                            ❤️ Favorito
+                        </p>
+
+                    {% endif %}
+
+                {% endif %}
+
+                <small>
+                    {{ atividade.data.strftime('%d/%m/%Y às %H:%M') }}
+                </small>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        Ainda não existem atividades na comunidade.
+    </p>
+
+{% endif %}
+```
+
+</div>
+
+{% endblock %}

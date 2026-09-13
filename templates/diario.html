@@ -1,0 +1,110 @@
+{% extends "template.html" %}
+{% block conteudo %}
+
+<div class="container">
+
+```
+<h1>Meu Diário</h1>
+
+<p>
+    Seu histórico de jogos no Joteca.
+</p>
+
+<hr>
+
+{% if atividades %}
+
+    {% for atividade in atividades %}
+
+        <div class="card mb-3">
+
+            <div class="card-body">
+
+                {% if atividade.tipo == 'avaliacao' %}
+
+                    <h4>
+                        Você avaliou
+                        <a href="{{ url_for('jogo', id=atividade.jogo.id) }}">
+                            {{ atividade.jogo.nome }}
+                        </a>
+                    </h4>
+
+                    <p>
+                        {% for estrela in range(atividade.avaliacao.nota) %}
+                            ⭐
+                        {% endfor %}
+                    </p>
+
+                    <p>
+                        <strong>
+                            {{ atividade.avaliacao.nota }}/5
+                        </strong>
+                    </p>
+
+                    {% if atividade.avaliacao.review %}
+
+                        <p>
+                            "{{ atividade.avaliacao.review }}"
+                        </p>
+
+                    {% endif %}
+
+                    <small>
+                        {{ atividade.data.strftime('%d/%m/%Y às %H:%M') }}
+                    </small>
+
+                {% elif atividade.tipo == 'biblioteca' %}
+
+                    <h4>
+                        Você adicionou
+                        <a href="{{ url_for('jogo', id=atividade.jogo.id) }}">
+                            {{ atividade.jogo.nome }}
+                        </a>
+                        à biblioteca
+                    </h4>
+
+                    <p>
+                        <strong>Status:</strong>
+                        {{ atividade.item.status }}
+                    </p>
+
+                    {% if atividade.item.favorito %}
+
+                        <p>
+                            ❤️ Favorito
+                        </p>
+
+                    {% endif %}
+
+                    <small>
+                        {{ atividade.data.strftime('%d/%m/%Y às %H:%M') }}
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        Seu diário ainda está vazio.
+    </p>
+
+    <a
+        href="{{ url_for('explorar') }}"
+        class="btn btn-primary">
+
+        Explorar jogos
+
+    </a>
+
+{% endif %}
+```
+
+</div>
+
+{% endblock %}

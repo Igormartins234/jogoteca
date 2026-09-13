@@ -1,0 +1,191 @@
+{% extends "template.html" %}
+{% block conteudo %}
+
+<div class="row">
+
+    <div class="col-md-12">
+
+        <h1>{{ usuario.nome }}</h1>
+
+        <p>
+            @{{ usuario.nickname }}
+        </p>
+
+    </div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+    <div class="col-md-4">
+
+        <h3>{{ biblioteca|length }}</h3>
+
+        <p>
+            Jogos na biblioteca
+        </p>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <h3>{{ concluidos }}</h3>
+
+        <p>
+            Jogos concluídos
+        </p>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <h3>{{ favoritos|length }}</h3>
+
+        <p>
+            Favoritos
+        </p>
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Favoritos</h2>
+
+{% if favoritos %}
+
+    <div class="row">
+
+        {% for item in favoritos %}
+
+            <div class="col-md-4">
+
+                <div class="panel panel-default">
+
+                    <div class="panel-body">
+
+                        <h3>
+                            {{ item.jogo.nome }}
+                        </h3>
+
+                        <p>
+                            {{ item.jogo.categoria }}
+                        </p>
+
+                        <p>
+                            {{ item.jogo.console }}
+                        </p>
+
+                        <p>
+                            ★ Favorito
+                        </p>
+
+                        <a
+                            href="{{ url_for('jogo', id=item.jogo.id) }}"
+                            class="btn btn-primary">
+
+                            Ver jogo
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <p>
+        Este jogador ainda não possui favoritos.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<h2>Biblioteca</h2>
+
+{% if biblioteca %}
+
+    {% for item in biblioteca %}
+
+        <div class="panel panel-default">
+
+            <div class="panel-body">
+
+                <h3>
+                    {{ item.jogo.nome }}
+                </h3>
+
+                <p>
+
+                    {{ item.jogo.categoria }}
+
+                    ·
+
+                    {{ item.jogo.console }}
+
+                </p>
+
+                <p>
+
+                    {% if item.status == 'quero_jogar' %}
+
+                        Quero jogar
+
+                    {% elif item.status == 'jogando' %}
+
+                        Jogando
+
+                    {% elif item.status == 'concluido' %}
+
+                        Concluído
+
+                    {% elif item.status == 'pausado' %}
+
+                        Pausado
+
+                    {% elif item.status == 'abandonado' %}
+
+                        Abandonado
+
+                    {% else %}
+
+                        {{ item.status }}
+
+                    {% endif %}
+
+                </p>
+
+                <a
+                    href="{{ url_for('jogo', id=item.jogo.id) }}"
+                    class="btn btn-primary">
+
+                    Ver jogo
+
+                </a>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        Este jogador ainda não possui jogos na biblioteca.
+    </p>
+
+{% endif %}
+
+{% endblock %}
+

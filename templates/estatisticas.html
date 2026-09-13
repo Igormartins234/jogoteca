@@ -1,0 +1,204 @@
+{% extends "template.html" %}
+{% block conteudo %}
+
+<div class="container">
+
+```
+<h1>Minhas Estatísticas</h1>
+
+<p>
+    Veja seus números no Joteca.
+</p>
+
+<hr>
+
+<div class="row">
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h3>Jogos na biblioteca</h3>
+                <h2>{{ total_jogos }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h3>Concluídos</h3>
+                <h2>{{ concluidos }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h3>Favoritos</h3>
+                <h2>{{ favoritos }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h3>Jogando</h3>
+                <h2>{{ jogando }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h3>Quero jogar</h3>
+                <h2>{{ quero_jogar }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h3>Avaliações</h3>
+                <h2>{{ total_avaliacoes }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<br>
+
+<div class="card">
+
+    <div class="card-body">
+
+        <h2>Minha nota média</h2>
+
+        {% if total_avaliacoes > 0 %}
+
+            <h1>
+                {{ "%.1f"|format(nota_media) }}/5
+            </h1>
+
+            <p>
+                {% for i in range(nota_media|round(0, 'floor')|int) %}
+                    ⭐
+                {% endfor %}
+            </p>
+
+        {% else %}
+
+            <p>
+                Você ainda não avaliou nenhum jogo.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+    <div class="col-md-6">
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <h2>Jogos por console</h2>
+
+                {% if jogos_por_console %}
+
+                    {% for console, quantidade in jogos_por_console %}
+
+                        <p>
+                            <strong>{{ console }}</strong>
+                            <span class="pull-right">
+                                {{ quantidade }}
+                            </span>
+                        </p>
+
+                        <hr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        Nenhum jogo encontrado.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <h2>Jogos por categoria</h2>
+
+                {% if jogos_por_categoria %}
+
+                    {% for categoria, quantidade in jogos_por_categoria %}
+
+                        <p>
+                            <strong>{{ categoria }}</strong>
+                            <span class="pull-right">
+                                {{ quantidade }}
+                            </span>
+                        </p>
+
+                        <hr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        Nenhum jogo encontrado.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<br>
+
+<a
+    href="{{ url_for('index') }}"
+    class="btn btn-secondary">
+
+    Voltar para minha biblioteca
+
+</a>
+```
+
+</div>
+
+{% endblock %}
