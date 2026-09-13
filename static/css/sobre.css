@@ -1,0 +1,47 @@
+/* ═══ Pilares (mini-cards de 3 colunas) ═══ */
+.pillar {
+  background: #FFFFFF;
+  border: 1px solid rgba(22,25,28,0.06);
+  border-radius: 16px;
+  padding: 20px 18px;
+  box-shadow: 0 1px 2px rgba(22,25,28,0.03);
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, border-color .35s;
+}
+.pillar:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0,200,83,0.20);
+  box-shadow:
+    0 2px 4px rgba(22,25,28,0.03),
+    0 14px 28px -14px rgba(22,25,28,0.10);
+}
+
+.pillar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.pillar-title {
+  font-family: 'Space Grotesk', ui-sans-serif, system-ui;
+  font-size: 14px;
+  font-weight: 600;
+  color: #16191C;
+  margin-bottom: 6px;
+  letter-spacing: -0.005em;
+}
+
+.pillar-text {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(22,25,28,0.55);
+}
+
+/* ═══ Reduced motion ═══ */
+@media (prefers-reduced-motion: reduce) {
+  .pillar { transition: none !important; }
+  .pillar:hover { transform: none !important; }
+}

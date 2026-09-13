@@ -7,18 +7,27 @@ import time
 
 @app.route('/')
 def index():
-    lista = Jogos.query.order_by(Jogos.id)
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    lista = Jogos.query.filter_by(usuario_id=session['usuario_id']).order_by(Jogos.id)
     return render_template('lista.html', titulo='Jogos', jogos=lista)
+
 
 @app.route('/novo')
 def novo():
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+    if 'usuario_id' not in session:
         return redirect(url_for('login', proxima=url_for('novo')))
+
     form = FormularioJogo()
     return render_template('novo.html', titulo='Novo Jogo', form=form)
 
+
 @app.route('/criar', methods=['POST',])
 def criar():
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
     form = FormularioJogo(request.form)
 
     if not form.validate_on_submit():
@@ -28,13 +37,13 @@ def criar():
     categoria = form.categoria.data
     console = form.console.data
 
-    jogo = Jogos.query.filter_by(nome=nome).first()
+    jogo = Jogos.query.filter_by(nome=nome, usuario_id=session['usuario_id']).first()
 
     if jogo:
         flash('Jogo já existente!')
         return redirect(url_for('index'))
 
-    novo_jogo = Jogos(nome=nome, categoria=categoria, console=console)
+    novo_jogo = Jogos(nome=nome, categoria=categoria, console=console, usuario_id=session['usuario_id'])
     db.session.add(novo_jogo)
     db.session.commit()
 
@@ -45,24 +54,41 @@ def criar():
 
     return redirect(url_for('index'))
 
+
 @app.route('/editar/<int:id>')
 def editar(id):
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+    if 'usuario_id' not in session:
         return redirect(url_for('login', proxima=url_for('editar', id=id)))
-    jogo = Jogos.query.filter_by(id=id).first()
+
+    jogo = Jogos.query.filter_by(id=id, usuario_id=session['usuario_id']).first()
+
+    if not jogo:
+        flash('Jogo não encontrado!')
+        return redirect(url_for('index'))
+
     form = FormularioJogo()
     form.nome.data = jogo.nome
     form.categoria.data = jogo.categoria
     form.console.data = jogo.console
     capa_jogo = recupera_imagem(id)
+
     return render_template('editar.html', titulo='Editando Jogo', id=id, capa_jogo=capa_jogo, form=form)
+
 
 @app.route('/atualizar', methods=['POST',])
 def atualizar():
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
     form = FormularioJogo(request.form)
 
     if form.validate_on_submit():
-        jogo = Jogos.query.filter_by(id=request.form['id']).first()
+        jogo = Jogos.query.filter_by(id=request.form['id'], usuario_id=session['usuario_id']).first()
+
+        if not jogo:
+            flash('Jogo não encontrado!')
+            return redirect(url_for('index'))
+
         jogo.nome = form.nome.data
         jogo.categoria = form.categoria.data
         jogo.console = form.console.data
@@ -73,18 +99,27 @@ def atualizar():
         arquivo = request.files['arquivo']
         upload_path = app.config['UPLOAD_PATH']
         timestamp = time.time()
-        deleta_arquivo(id)
+        deleta_arquivo(jogo.id)
         arquivo.save(f'{upload_path}/capa{jogo.id}-{timestamp}.jpg')
 
     return redirect(url_for('index'))
 
+
 @app.route('/deletar/<int:id>')
 def deletar(id):
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+    if 'usuario_id' not in session:
         return redirect(url_for('login'))
 
-    Jogos.query.filter_by(id=id).delete()
+    jogo = Jogos.query.filter_by(id=id, usuario_id=session['usuario_id']).first()
+
+    if not jogo:
+        flash('Jogo não encontrado!')
+        return redirect(url_for('index'))
+
+    deleta_arquivo(id)
+    db.session.delete(jogo)
     db.session.commit()
+
     flash('Jogo deletado com sucesso!')
 
     return redirect(url_for('index'))

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sobre · GameHub</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/tailwind.config.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sobre.css') }}">
+</head>
+
+<body class="relative min-h-screen overflow-x-hidden bg-cream font-sans text-ink selection:bg-green/20">
+
+  <!-- fundo: orbs discretos -->
+  <div class="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+    <div class="orb orb-blue   h-[420px] w-[420px] rounded-full bg-blue/[0.08]"   style="--dur:-2s"></div>
+    <div class="orb orb-orange h-[380px] w-[380px] rounded-full bg-orange/[0.07]" style="--dur:-4s"></div>
+    <div class="orb orb-green  h-[460px] w-[460px] rounded-full bg-green/[0.09]"  style="--dur:0s"></div>
+  </div>
+
+  <div class="relative z-10 flex min-h-screen flex-col">
+
+    <!-- ═══ HEADER ═══ -->
+    <header class="flex items-center justify-between px-6 py-5 sm:px-10">
+
+      <a href="{{ url_for('index') }}" class="flex items-center gap-2.5">
+        <svg viewBox="0 0 44 30" class="h-6 w-auto" aria-hidden="true">
+          <circle cx="13" cy="15" r="11" fill="#2979FF" opacity="0.9"/>
+          <circle cx="31" cy="15" r="11" fill="#FF6D00" opacity="0.9"/>
+          <circle cx="22" cy="15" r="11" fill="#00C853"/>
+          <path d="M17.2 13.4h2.1v-1.2a0.9 0.9 0 1 1 1.8 0v1.2h1.2a0.9 0.9 0 1 1 0 1.8H21v1.2a0.9 0.9 0 1 1-1.8 0v-1.2h-2.1a0.9 0.9 0 1 1 0-1.8Z" fill="#FBFAF7"/>
+          <circle cx="26.6" cy="13.6" r="0.9" fill="#FBFAF7"/>
+          <circle cx="28.6" cy="15.2" r="0.9" fill="#FBFAF7"/>
+          <circle cx="26.6" cy="16.8" r="0.9" fill="#FBFAF7"/>
+          <circle cx="24.6" cy="15.2" r="0.9" fill="#FBFAF7"/>
+        </svg>
+
+        <span class="font-display text-[17px] font-semibold tracking-tight">
+          Game<span class="text-green-deep">Hub</span>
+        </span>
+      </a>
+
+      <nav class="hidden items-center gap-6 text-[13px] text-ink/55 sm:flex">
+        <a href="{{ url_for('index') }}" class="transition hover:text-ink">Descobrir</a>
+        <a href="{{ url_for('sobre') }}" class="font-medium text-ink">Sobre</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="{{ url_for('login') }}" class="hidden rounded-xl px-4 py-2 text-[13px] font-medium text-ink/70 transition hover:text-ink sm:block">
+          Entrar
+        </a>
+        <a href="{{ url_for('cadastro') }}"
+           class="rounded-xl bg-ink px-4 py-2 text-[13px] font-semibold text-cream transition duration-300 hover:bg-green-deep">
+          Criar conta
+        </a>
+      </div>
+
+    </header>
+
+    <!-- ═══ MAIN ═══ -->
+    <main class="flex flex-1 justify-center px-6 py-10 sm:px-8 sm:py-14">
+      <div class="w-full max-w-[640px] animate-rise">
+
+        <!-- ═══ HERO ═══ -->
+        <section class="text-center">
+          <p class="mb-3 text-[11px] font-medium uppercase tracking-[0.32em] text-green-deep">
+            Sobre
+          </p>
+
+          <h1 class="font-display text-[2rem] font-light leading-[1.15] tracking-tight text-ink sm:text-[2.5rem]">
+            Uma estante silenciosa<br>
+            para os jogos que marcaram você.
+          </h1>
+
+          <p class="mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-ink/55">
+            GameHub nasceu de um incômodo simples: lembrar o que a gente jogou é difícil.
+            E esquecer aquele indie que virou a chave é pior ainda.
+          </p>
+        </section>
+
+        <!-- ═══ DIVISOR ═══ -->
+        <div class="my-12 flex items-center gap-4">
+          <span class="h-px flex-1 bg-ink/[0.08]"></span>
+          <span class="h-1 w-1 rounded-full bg-ink/20"></span>
+          <span class="h-px flex-1 bg-ink/[0.08]"></span>
+        </div>
+
+        <!-- ═══ CARTÃO: história ═══ -->
+        <article class="card">
+          <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-green/10">
+            <svg class="h-4 w-4 text-green-deep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>
+            </svg>
+          </div>
+
+          <h2 class="font-display text-[1.35rem] font-medium tracking-tight text-ink">
+            Um histórico, não um ranking
+          </h2>
+
+          <div class="mt-3 space-y-3 text-[14px] leading-relaxed text-ink/60">
+            <p>
+              Aqui não tem nota, nem média, nem "melhores do ano". A ideia é mais simples:
+              você marca o que jogou e o que quer jogar, e a plataforma guarda isso pra você.
+            </p>
+            <p>
+              Com o tempo, sua biblioteca vira um diário. Você olha pra trás e lembra
+              daquela fase, daquele ano, daquele jogo que você não largava.
+            </p>
+          </div>
+        </article>
+
+        <!-- ═══ PILARES ═══ -->
+        <section class="mt-10 grid gap-4 sm:grid-cols-3">
+
+          <div class="pillar">
+            <div class="pillar-icon" style="background: rgba(0,200,83,0.10); color: #00A850;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </div>
+            <h3 class="pillar-title">Marcar é fácil</h3>
+            <p class="pillar-text">Um clique e o jogo entra na sua lista. Sem formulários, sem notas obrigatórias.</p>
+          </div>
+
+          <div class="pillar">
+            <div class="pillar-icon" style="background: rgba(41,121,255,0.10); color: #2979FF;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <h3 class="pillar-title">No seu tempo</h3>
+            <p class="pillar-text">Nada de streaks, notificações ou pressão social. Você joga quando quiser.</p>
+          </div>
+
+          <div class="pillar">
+            <div class="pillar-icon" style="background: rgba(255,109,0,0.10); color: #E8622B;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3 class="pillar-title">Feito com amigos</h3>
+            <p class="pillar-text">Veja o que quem você gosta está jogando — e descubra pérolas por indicação.</p>
+          </div>
+
+        </section>
+
+        <!-- ═══ CITAÇÃO ═══ -->
+        <section class="mt-12 rounded-2xl border border-ink/[0.06] bg-white/60 px-6 py-8 text-center sm:px-10">
+          <p class="font-display text-[1.15rem] font-light italic leading-snug text-ink/70 sm:text-[1.3rem]">
+            “Não é sobre jogar mais.<br class="hidden sm:block">
+            É sobre lembrar do que importou.”
+          </p>
+        </section>
+
+        <!-- ═══ CTA ═══ -->
+        <section class="mt-12 text-center">
+
+          <h2 class="font-display text-[1.35rem] font-medium tracking-tight text-ink">
+            Pronto pra começar?
+          </h2>
+
+          <p class="mt-2 text-[13px] text-ink/50">
+            Leva menos de um minuto — e sua biblioteca começa hoje.
+          </p>
+
+          <div class="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <a href="{{ url_for('cadastro') }}"
+               class="w-full rounded-xl bg-ink px-6 py-3.5 text-[14px] font-semibold text-cream transition duration-300 hover:bg-green-deep hover:shadow-[0_14px_30px_-12px_rgba(0,168,80,0.5)] sm:w-auto">
+              Criar minha conta
+            </a>
+
+            <a href="{{ url_for('index') }}"
+               class="group flex w-full items-center justify-center gap-2 rounded-xl border border-ink/10 bg-white px-6 py-3.5 text-[13px] font-medium text-ink/70 transition duration-300 hover:border-green/30 hover:bg-green/[0.04] hover:text-ink sm:w-auto">
+              <svg class="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-0.5"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              Explorar primeiro
+            </a>
+          </div>
+
+        </section>
+
+        <p class="mt-14 text-center text-[11px] leading-relaxed text-ink/35">
+          Feito para jogar devagar · © 2026 GameHub
+        </p>
+
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>
