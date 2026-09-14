@@ -1,109 +1,529 @@
 {% extends "template.html" %}
 {% block conteudo %}
 
-<div class="container">
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     Diário · escopo local (prefixo .dr-)
+     ═══════════════════════════════════════════════════════════ */
 
-```
-<h1>Meu Diário</h1>
+  .dr-wrap { max-width: 720px; margin: 0 auto; }
 
-<p>
-    Seu histórico de jogos no Joteca.
-</p>
+  /* ─── Cabeçalho ─── */
+  .dr-head { margin-bottom: 40px; }
 
-<hr>
+  .dr-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: #00A850;
+    margin: 0 0 6px;
+  }
 
-{% if atividades %}
+  .dr-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.85rem;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #16191C;
+    margin: 0;
+  }
 
-    {% for atividade in atividades %}
+  .dr-sub {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(22,25,28,0.52);
+    max-width: 480px;
+  }
 
-        <div class="card mb-3">
+  /* ═══ Timeline ═══ */
+  .dr-timeline {
+    position: relative;
+    padding-left: 28px;
+  }
 
-            <div class="card-body">
+  /* linha vertical */
+  .dr-timeline::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 7px;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(22,25,28,0.10) 6%,
+      rgba(22,25,28,0.10) 94%,
+      transparent 100%
+    );
+  }
 
-                {% if atividade.tipo == 'avaliacao' %}
+  /* ─── Grupo por dia ─── */
+  .dr-day { margin-bottom: 8px; }
 
-                    <h4>
-                        Você avaliou
-                        <a href="{{ url_for('jogo', id=atividade.jogo.id) }}">
-                            {{ atividade.jogo.nome }}
-                        </a>
-                    </h4>
+  .dr-day-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 14px -28px;
+    padding-left: 28px;
+    position: relative;
+  }
 
-                    <p>
-                        {% for estrela in range(atividade.avaliacao.nota) %}
-                            ⭐
-                        {% endfor %}
-                    </p>
+  .dr-day-label::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #FBFAF7;
+    border: 2px solid rgba(22,25,28,0.20);
+    box-sizing: border-box;
+  }
 
-                    <p>
-                        <strong>
-                            {{ atividade.avaliacao.nota }}/5
-                        </strong>
-                    </p>
+  .dr-day-text {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(22,25,28,0.42);
+  }
 
-                    {% if atividade.avaliacao.review %}
+  /* ─── Item ─── */
+  .dr-item {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding-bottom: 18px;
+    margin-left: 0;
+  }
 
-                        <p>
-                            "{{ atividade.avaliacao.review }}"
-                        </p>
+  /* marcador na linha */
+  .dr-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 18px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #FBFAF7;
+    box-shadow: 0 0 0 1px rgba(22,25,28,0.10);
+    transition: box-shadow .25s ease;
+    z-index: 1;
+  }
+  .dr-item--avaliacao::before { background: #00A850; box-shadow: 0 0 0 3px rgba(0,200,83,0.14); }
+  .dr-item--biblioteca::before { background: #2979FF; box-shadow: 0 0 0 3px rgba(41,121,255,0.14); }
 
-                    {% endif %}
+  /* ─── Card ─── */
+  .dr-card {
+    flex: 1;
+    min-width: 0;
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 1px 2px rgba(22,25,28,0.03);
+    transition: border-color .3s ease, box-shadow .3s ease, transform .3s ease;
+  }
+  .dr-card:hover {
+    border-color: rgba(0,200,83,0.20);
+    box-shadow:
+      0 2px 4px rgba(22,25,28,0.03),
+      0 14px 28px -18px rgba(22,25,28,0.12);
+    transform: translateY(-1px);
+  }
 
-                    <small>
-                        {{ atividade.data.strftime('%d/%m/%Y às %H:%M') }}
-                    </small>
+  /* ─── Topo do card ─── */
+  .dr-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
 
-                {% elif atividade.tipo == 'biblioteca' %}
+  .dr-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    border-radius: 6px;
+  }
+  .dr-type--avaliacao {
+    background: rgba(0,200,83,0.10);
+    color: #00A850;
+  }
+  .dr-type--biblioteca {
+    background: rgba(41,121,255,0.10);
+    color: #2979FF;
+  }
+  .dr-type svg { width: 11px; height: 11px; }
 
-                    <h4>
-                        Você adicionou
-                        <a href="{{ url_for('jogo', id=atividade.jogo.id) }}">
-                            {{ atividade.jogo.nome }}
-                        </a>
-                        à biblioteca
-                    </h4>
+  .dr-time {
+    margin-left: auto;
+    font-size: 11.5px;
+    color: rgba(22,25,28,0.38);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
 
-                    <p>
-                        <strong>Status:</strong>
-                        {{ atividade.item.status }}
-                    </p>
+  /* ─── Linha principal ─── */
+  .dr-line {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(22,25,28,0.72);
+    margin: 0;
+  }
+  .dr-line strong {
+    color: #16191C;
+    font-weight: 500;
+  }
 
-                    {% if atividade.item.favorito %}
+  .dr-game {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #16191C;
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+  .dr-game:hover { color: #00A850; }
 
-                        <p>
-                            ❤️ Favorito
-                        </p>
+  /* ─── Nota / estrelas ─── */
+  .dr-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .dr-stars {
+    display: inline-flex;
+    gap: 1px;
+    color: #E8622B;
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+  .dr-rating-num {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+  }
 
-                    {% endif %}
+  /* ─── Review ─── */
+  .dr-review {
+    position: relative;
+    margin: 12px 0 0;
+    padding: 12px 14px 12px 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    font-style: italic;
+    color: rgba(22,25,28,0.68);
+    background: #FBFAF7;
+    border-radius: 10px;
+    border-left: 2px solid rgba(0,200,83,0.35);
+  }
 
-                    <small>
-                        {{ atividade.data.strftime('%d/%m/%Y às %H:%M') }}
-                    </small>
+  /* ─── Status pill (biblioteca) ─── */
+  .dr-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border-radius: 999px;
+  }
+  .dr-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+  .dr-status--jogando    { background: rgba(41,121,255,0.10); color: #2979FF; }
+  .dr-status--concluido  { background: rgba(0,200,83,0.10);   color: #00A850; }
+  .dr-status--quero      { background: rgba(232,98,43,0.10);  color: #E8622B; }
+  .dr-status--pausado    { background: rgba(245,158,11,0.14); color: #B45309; }
+  .dr-status--abandonado { background: rgba(22,25,28,0.08);   color: rgba(22,25,28,0.65); }
 
-                {% endif %}
+  /* ─── Favorito ─── */
+  .dr-fav {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 8px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #E8622B;
+  }
+
+  /* ═══ Estado vazio ═══ */
+  .dr-empty {
+    padding: 56px 24px;
+    text-align: center;
+    background: #FFFFFF;
+    border: 1px dashed rgba(22,25,28,0.12);
+    border-radius: 18px;
+  }
+
+  .dr-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(0,200,83,0.08);
+    color: #00A850;
+    margin-bottom: 18px;
+  }
+
+  .dr-empty-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: #16191C;
+    margin: 0 0 6px;
+  }
+
+  .dr-empty-text {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgba(22,25,28,0.55);
+    margin: 0 auto 20px;
+    max-width: 320px;
+  }
+
+  .dr-empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #16191C;
+    color: #FBFAF7;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background .3s ease, transform .3s ease;
+  }
+  .dr-empty-cta:hover {
+    background: #00A850;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  /* ─── Responsivo ─── */
+  @media (max-width: 640px) {
+    .dr-wrap { padding: 0; }
+    .dr-title { font-size: 1.5rem; }
+    .dr-timeline { padding-left: 22px; }
+    .dr-timeline::before { left: 5px; }
+    .dr-day-label { margin-left: -22px; padding-left: 22px; }
+    .dr-day-label::before { left: 1px; }
+    .dr-item::before { left: -20px; }
+    .dr-card { padding: 14px 14px; }
+    .dr-time { font-size: 11px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dr-card, .dr-game { transition: none !important; }
+    .dr-card:hover { transform: none !important; }
+  }
+</style>
+
+<div class="dr-wrap">
+
+  {# ═══════════════ CABEÇALHO ═══════════════ #}
+  <header class="dr-head">
+    <p class="dr-eyebrow">Sua história</p>
+    <h1 class="dr-title">Meu diário</h1>
+    <p class="dr-sub">
+      Um registro silencioso do que você jogou, avaliou e adicionou à sua coleção.
+    </p>
+  </header>
+
+  {% if atividades %}
+
+    {# ═══════════════ TIMELINE ═══════════════ #}
+    <div class="dr-timeline">
+
+      {# agrupa por dia usando namespace do Jinja #}
+      {% set ns = namespace(dia_atual=None) %}
+
+      {% for atividade in atividades %}
+
+        {% set dia = atividade.data.strftime('%Y-%m-%d') %}
+
+        {% if dia != ns.dia_atual %}
+          {% if not loop.first %}</div>{% endif %}
+          {% set ns.dia_atual = dia %}
+
+          <div class="dr-day">
+            <div class="dr-day-label">
+              <span class="dr-day-text">
+                {{ atividade.data.strftime('%d de %B') }}
+              </span>
+            </div>
+        {% endif %}
+
+        {% if atividade.tipo == 'avaliacao' %}
+
+          {# ─── Item: avaliação ─── #}
+          <div class="dr-item dr-item--avaliacao">
+
+            <div class="dr-card">
+
+              <div class="dr-card-head">
+                <span class="dr-type dr-type--avaliacao">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  Avaliou
+                </span>
+                <span class="dr-time">
+                  {{ atividade.data.strftime('%H:%M') }}
+                </span>
+              </div>
+
+              <p class="dr-line">
+                Você avaliou
+                <a href="{{ url_for('jogo', id=atividade.jogo.id) }}" class="dr-game">
+                  {{ atividade.jogo.nome }}
+                </a>
+              </p>
+
+              <div class="dr-rating">
+                <span class="dr-stars" aria-label="Nota {{ atividade.avaliacao.nota }} de 5">
+                  {% for _ in range(atividade.avaliacao.nota) %}★{% endfor %}
+                  {% for _ in range(5 - atividade.avaliacao.nota) %}<span style="color: rgba(22,25,28,0.15);">★</span>{% endfor %}
+                </span>
+                <span class="dr-rating-num">
+                  {{ atividade.avaliacao.nota }}/5
+                </span>
+              </div>
+
+              {% if atividade.avaliacao.review %}
+                <blockquote class="dr-review">
+                  “{{ atividade.avaliacao.review }}”
+                </blockquote>
+              {% endif %}
 
             </div>
 
-        </div>
+          </div>
 
-    {% endfor %}
+        {% elif atividade.tipo == 'biblioteca' %}
 
-{% else %}
+          {# ─── Item: adição à biblioteca ─── #}
+          <div class="dr-item dr-item--biblioteca">
 
-    <p>
-        Seu diário ainda está vazio.
-    </p>
+            <div class="dr-card">
 
-    <a
-        href="{{ url_for('explorar') }}"
-        class="btn btn-primary">
+              <div class="dr-card-head">
+                <span class="dr-type dr-type--biblioteca">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  Adicionou
+                </span>
+                <span class="dr-time">
+                  {{ atividade.data.strftime('%H:%M') }}
+                </span>
+              </div>
 
+              <p class="dr-line">
+                Você adicionou
+                <a href="{{ url_for('jogo', id=atividade.jogo.id) }}" class="dr-game">
+                  {{ atividade.jogo.nome }}
+                </a>
+                à biblioteca
+              </p>
+
+              {% set st = atividade.item.status %}
+              {% if st == 'jogando' %}
+                <span class="dr-status dr-status--jogando">Jogando</span>
+              {% elif st == 'concluido' %}
+                <span class="dr-status dr-status--concluido">Concluído</span>
+              {% elif st == 'quero_jogar' %}
+                <span class="dr-status dr-status--quero">Quero jogar</span>
+              {% elif st == 'pausado' %}
+                <span class="dr-status dr-status--pausado">Pausado</span>
+              {% elif st == 'abandonado' %}
+                <span class="dr-status dr-status--abandonado">Abandonado</span>
+              {% elif st %}
+                <span class="dr-status dr-status--abandonado">{{ st }}</span>
+              {% endif %}
+
+              {% if atividade.item.favorito %}
+                <span class="dr-fav">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                  Favorito
+                </span>
+              {% endif %}
+
+            </div>
+
+          </div>
+
+        {% endif %}
+
+        {# fecha o último grupo de dia #}
+        {% if loop.last %}</div>{% endif %}
+
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    {# ═══════════════ VAZIO ═══════════════ #}
+    <div class="dr-empty">
+      <div class="dr-empty-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>
+          <path d="M9 7h7M9 11h7"/>
+        </svg>
+      </div>
+
+      <h3 class="dr-empty-title">Seu diário ainda está vazio</h3>
+      <p class="dr-empty-text">
+        Adicione um jogo à sua biblioteca ou avalie algo que você já jogou para começar seu histórico.
+      </p>
+
+      <a href="{{ url_for('explorar') }}" class="dr-empty-cta">
         Explorar jogos
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+          <path d="M5 12h14M13 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
 
-    </a>
-
-{% endif %}
-```
+  {% endif %}
 
 </div>
 

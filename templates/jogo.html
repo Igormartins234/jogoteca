@@ -1,337 +1,1026 @@
 {% extends "template.html" %}
 {% block conteudo %}
 
-<div class="container">
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     Detalhe do jogo · escopo local (prefixo .jd-)
+     ═══════════════════════════════════════════════════════════ */
 
-<div class="row">
+  .jd-wrap { max-width: 1080px; margin: 0 auto; }
 
-    <div class="col-md-4">
+  /* ═══ Voltar ═══ */
+  .jd-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 22px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: rgba(22,25,28,0.50);
+    text-decoration: none;
+    transition: color .2s ease, gap .3s ease;
+  }
+  .jd-back:hover { color: #16191C; gap: 9px; }
+  .jd-back svg { transition: transform .3s ease; }
+  .jd-back:hover svg { transform: translateX(-2px); }
 
-        <img
-            src="{{ url_for('imagem', nome_arquivo=capa_jogo) }}"
-            class="img-responsive img-thumbnail"
-            alt="{{ jogo.nome }}">
+  /* ═══ Hero ═══ */
+  .jd-hero {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 36px;
+    margin-bottom: 44px;
+  }
+  @media (max-width: 720px) {
+    .jd-hero {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
 
+  .jd-cover {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #EFEDE8;
+    border: 1px solid rgba(22,25,28,0.06);
+    box-shadow:
+      0 2px 4px rgba(22,25,28,0.04),
+      0 24px 48px -24px rgba(22,25,28,0.18);
+  }
+  @media (max-width: 720px) {
+    .jd-cover {
+      max-width: 220px;
+      margin: 0 auto;
+    }
+  }
+
+  .jd-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .jd-cover-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #EFEDE8 0%, #E3E1DB 100%);
+    color: rgba(22,25,28,0.18);
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 4rem;
+    font-weight: 500;
+    user-select: none;
+  }
+
+  /* ─── Info principal ─── */
+  .jd-info { display: flex; flex-direction: column; min-width: 0; }
+
+  .jd-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: #00A850;
+    margin: 0 0 8px;
+  }
+
+  .jd-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 2.4rem;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: #16191C;
+    margin: 0;
+  }
+  @media (max-width: 640px) {
+    .jd-title { font-size: 1.8rem; }
+  }
+
+  /* ─── Tags (categoria/console) ─── */
+  .jd-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .jd-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(22,25,28,0.68);
+    background: rgba(22,25,28,0.045);
+    border-radius: 999px;
+  }
+  .jd-tag svg { color: rgba(22,25,28,0.42); }
+
+  /* ─── Rating hero ─── */
+  .jd-rating-hero {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 26px;
+    padding: 18px 20px;
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(22,25,28,0.03);
+  }
+
+  .jd-rating-score {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 2.2rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+  }
+  .jd-rating-den {
+    font-size: 14px;
+    color: rgba(22,25,28,0.35);
+  }
+  .jd-rating-stars {
+    color: #E8622B;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+    line-height: 1;
+  }
+  .jd-rating-meta {
+    margin-left: auto;
+    font-size: 12.5px;
+    color: rgba(22,25,28,0.42);
+    text-align: right;
+  }
+  @media (max-width: 520px) {
+    .jd-rating-hero { flex-wrap: wrap; }
+    .jd-rating-meta { margin-left: 0; width: 100%; text-align: left; }
+  }
+
+  .jd-rating-empty {
+    margin: 0;
+    font-size: 13.5px;
+    color: rgba(22,25,28,0.52);
+  }
+
+  /* ─── Jogadores ─── */
+  .jd-players {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-size: 13px;
+    color: rgba(22,25,28,0.55);
+  }
+  .jd-players strong {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ═══ Bloco (card branco de seção) ═══ */
+  .jd-block {
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(22,25,28,0.03);
+    margin-bottom: 20px;
+  }
+  @media (max-width: 640px) {
+    .jd-block { padding: 20px 18px; border-radius: 16px; }
+  }
+
+  .jd-block-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .jd-block-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: #16191C;
+    margin: 0;
+  }
+  .jd-block-title svg { color: rgba(22,25,28,0.35); }
+  .jd-block-title--green svg { color: #00A850; }
+  .jd-block-title--orange svg { color: #E8622B; }
+
+  .jd-block-tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(22,25,28,0.35);
+  }
+
+  /* ═══ Biblioteca: status atual + ações ═══ */
+  .jd-status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .jd-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 999px;
+  }
+  .jd-status-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.75;
+  }
+  .jd-status-pill--jogando    { background: rgba(41,121,255,0.10); color: #2979FF; }
+  .jd-status-pill--concluido  { background: rgba(0,200,83,0.10);   color: #00A850; }
+  .jd-status-pill--quero      { background: rgba(232,98,43,0.10);  color: #E8622B; }
+  .jd-status-pill--pausado    { background: rgba(245,158,11,0.14); color: #B45309; }
+  .jd-status-pill--abandonado { background: rgba(22,25,28,0.08);   color: rgba(22,25,28,0.65); }
+
+  .jd-fav-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #E8622B;
+    background: rgba(232,98,43,0.10);
+    border-radius: 999px;
+  }
+
+  /* ─── Formulários dentro do projeto ─── */
+  .jd-form-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 560px) {
+    .jd-form-row { flex-direction: column; align-items: stretch; }
+  }
+
+  .jd-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+  .jd-field--auto { flex: 0 0 auto; }
+
+  .jd-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(22,25,28,0.48);
+    margin: 0 0 7px 2px;
+  }
+
+  .jd-input,
+  .jd-select,
+  .jd-textarea {
+    width: 100%;
+    padding: 11px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #16191C;
+    background: #F5F3EF;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    outline: none;
+    transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+    -webkit-appearance: none;
+            appearance: none;
+  }
+
+  .jd-input,
+  .jd-select,
+  .jd-textarea {
+    width: 100%;
+    padding: 11px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #16191C;
+    background-color: #F5F3EF;   /* ← era background: */
+    border: 1px solid transparent;
+    border-radius: 11px;
+    outline: none;
+    transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+    -webkit-appearance: none;
+            appearance: none;
+  }
+
+  .jd-input::placeholder,
+  .jd-textarea::placeholder { color: rgba(22,25,28,0.32); }
+
+  .jd-input:hover,
+  .jd-select:hover,
+  .jd-textarea:hover { background-color: #F0EEE9; }   /* ← era background: */
+
+  .jd-input:focus,
+  .jd-select:focus,
+  .jd-textarea:focus {
+    background-color: #FFFFFF;   /* ← era background: */
+    border-color: #00C853;
+    box-shadow: 0 0 0 4px rgba(0,200,83,0.12);
+  }
+
+  /* ─── Select com seta única ─── */
+  .jd-select {
+    cursor: pointer;
+    padding-right: 34px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2316191C' stroke-opacity='0.4' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px 12px;
+  }
+
+  /* remove a seta verde do focus — o select continua com a mesma seta */
+  .jd-select:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2316191C' stroke-opacity='0.55' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px 12px;
+  }
+
+  .jd-select {
+    cursor: pointer;
+    padding-right: 34px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2316191C' stroke-opacity='0.4' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+  .jd-select:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300A850' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+
+  .jd-textarea {
+    resize: vertical;
+    min-height: 96px;
+    line-height: 1.55;
+    font-family: inherit;
+  }
+
+  /* ─── Checkbox customizado ─── */
+  .jd-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    background: #F5F3EF;
+    border-radius: 11px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(22,25,28,0.75);
+    transition: background .25s ease;
+    user-select: none;
+    height: 42px;
+  }
+  .jd-check:hover { background: #F0EEE9; }
+  .jd-check input { position: absolute; opacity: 0; pointer-events: none; }
+  .jd-check-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid rgba(22,25,28,0.22);
+    border-radius: 5px;
+    background: #FFFFFF;
+    transition: background .2s ease, border-color .2s ease;
+    flex-shrink: 0;
+  }
+  .jd-check-box svg {
+    width: 11px;
+    height: 11px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+  .jd-check input:checked ~ .jd-check-box {
+    background: #E8622B;
+    border-color: #E8622B;
+  }
+  .jd-check input:checked ~ .jd-check-box svg { opacity: 1; }
+  .jd-check input:focus-visible ~ .jd-check-box {
+    box-shadow: 0 0 0 4px rgba(232,98,43,0.16);
+  }
+
+  /* ─── Botões ─── */
+  .jd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 42px;
+    padding: 0 20px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border: 0;
+    border-radius: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background .3s ease, color .3s ease, border-color .3s ease,
+                transform .3s ease, box-shadow .3s ease;
+  }
+  .jd-btn:active { transform: translateY(1px); }
+
+  .jd-btn--primary {
+    background: #16191C;
+    color: #FBFAF7;
+  }
+  .jd-btn--primary:hover {
+    background: #00A850;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -12px rgba(0,168,80,0.55);
+  }
+
+  .jd-btn--success {
+    background: #00C853;
+    color: #0A0E12;
+  }
+  .jd-btn--success:hover {
+    background: #00A850;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -12px rgba(0,168,80,0.55);
+  }
+
+  .jd-btn--outline {
+    background: #FFFFFF;
+    color: rgba(22,25,28,0.75);
+    border: 1px solid rgba(22,25,28,0.10);
+  }
+  .jd-btn--outline:hover {
+    border-color: rgba(0,200,83,0.30);
+    background: rgba(0,200,83,0.04);
+    color: #16191C;
+  }
+
+  .jd-btn--danger {
+    background: transparent;
+    color: rgba(232,98,43,0.85);
+    padding: 0 4px;
+    height: auto;
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+  .jd-btn--danger:hover {
+    color: #E8622B;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ─── Divisor fino entre ações ─── */
+  .jd-actions-divider {
+    height: 1px;
+    background: rgba(22,25,28,0.07);
+    margin: 18px 0;
+  }
+
+  /* ═══ Minha avaliação ═══ */
+  .jd-mine-existing {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: #FBFAF7;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .jd-mine-score {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .jd-mine-body { flex: 1; min-width: 0; }
+  .jd-mine-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(22,25,28,0.42);
+    margin: 0 0 4px;
+  }
+  .jd-mine-text {
+    margin: 8px 0 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    font-style: italic;
+    color: rgba(22,25,28,0.68);
+  }
+
+  /* ═══ Avaliações da comunidade ═══ */
+  .jd-reviews { display: flex; flex-direction: column; gap: 12px; }
+
+  .jd-review {
+    padding: 18px 20px;
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 14px;
+    transition: border-color .3s ease, box-shadow .3s ease;
+  }
+  .jd-review:hover {
+    border-color: rgba(0,200,83,0.18);
+    box-shadow: 0 2px 4px rgba(22,25,28,0.03), 0 12px 24px -18px rgba(22,25,28,0.10);
+  }
+  .jd-review.is-mine {
+    border-color: rgba(0,200,83,0.28);
+    background: linear-gradient(180deg, rgba(0,200,83,0.025) 0%, rgba(0,200,83,0) 100%);
+  }
+
+  .jd-review-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .jd-review-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #16191C;
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+  .jd-review-author:hover { color: #00A850; }
+
+  .jd-review-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00C853 0%, #2979FF 100%);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .jd-review-you {
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #00A850;
+    background: rgba(0,200,83,0.10);
+    border-radius: 5px;
+  }
+
+  .jd-review-score {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: rgba(22,25,28,0.55);
+    white-space: nowrap;
+  }
+  .jd-review-score .num {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+  }
+  .jd-review-stars {
+    color: #E8622B;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .jd-review-text {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: rgba(22,25,28,0.72);
+  }
+  .jd-review-text--muted {
+    font-style: italic;
+    color: rgba(22,25,28,0.40);
+  }
+
+  /* ═══ Estado vazio ═══ */
+  .jd-empty {
+    padding: 32px 20px;
+    text-align: center;
+    background: #FBFAF7;
+    border: 1px dashed rgba(22,25,28,0.10);
+    border-radius: 14px;
+  }
+  .jd-empty-text {
+    margin: 0;
+    font-size: 13.5px;
+    color: rgba(22,25,28,0.55);
+  }
+
+  /* ═══ Reduced motion ═══ */
+  @media (prefers-reduced-motion: reduce) {
+    .jd-back, .jd-btn, .jd-review, .jd-review-author,
+    .jd-input, .jd-select, .jd-textarea, .jd-check,
+    .jd-check-box, .jd-check-box svg { transition: none !important; }
+    .jd-btn:hover, .jd-back:hover, .jd-back:hover svg { transform: none !important; }
+  }
+</style>
+
+<div class="jd-wrap">
+
+  {# ═══════════════ VOLTAR ═══════════════ #}
+  <a href="{{ url_for('explorar') }}" class="jd-back">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Voltar para explorar
+  </a>
+
+  {# ═══════════════ HERO ═══════════════ #}
+  <section class="jd-hero">
+
+    <div class="jd-cover">
+      {% if capa_jogo %}
+        <img src="{{ url_for('imagem', nome_arquivo=capa_jogo) }}"
+             alt="Capa de {{ jogo.nome }}">
+      {% else %}
+        <div class="jd-cover-fallback">
+          <span>{{ jogo.nome[0]|upper }}</span>
+        </div>
+      {% endif %}
     </div>
 
-    <div class="col-md-8">
+    <div class="jd-info">
 
-        <h1>{{ jogo.nome }}</h1>
+      <p class="jd-eyebrow">Detalhes do jogo</p>
+      <h1 class="jd-title">{{ jogo.nome }}</h1>
 
-        <p>
-            <strong>Categoria:</strong>
+      <div class="jd-tags">
+        {% if jogo.categoria %}
+          <span class="jd-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41 21 13a2 2 0 0 0-2.83-2.83l-.59.59L9.76 3H5a2 2 0 0 0-2 2v4.76l7.41 7.41-.59.59A2 2 0 0 0 12.66 21l.59-.59"/>
+              <circle cx="7.5" cy="7.5" r="1"/>
+            </svg>
             {{ jogo.categoria }}
-        </p>
+          </span>
+        {% endif %}
 
-        <p>
-            <strong>Console:</strong>
+        {% if jogo.console %}
+          <span class="jd-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="3"/>
+              <path d="M7 12h2M8 11v2M15 11v.01M18 13v.01M15.5 13v.01M18 11v.01"/>
+            </svg>
             {{ jogo.console }}
-        </p>
-
-        <p>
-            <strong>{{ quantidade_jogadores }}</strong>
-            jogadores possuem este jogo
-        </p>
-
-        <hr>
-
-        <h3>Avaliação da comunidade</h3>
-
-        {% if avaliacoes %}
-
-            <h2>
-                ⭐ {{ "%.1f"|format(media) }}/5
-            </h2>
-
-            <p>
-                {{ avaliacoes|length }} avaliações
-            </p>
-
-        {% else %}
-
-            <p>
-                Ainda não existem avaliações.
-            </p>
-
+          </span>
         {% endif %}
+      </div>
 
-        <hr>
+      {# ─── Rating da comunidade ─── #}
+      {% if avaliacoes %}
+        <div class="jd-rating-hero">
+          <span class="jd-rating-score">{{ "%.1f"|format(media) }}</span>
+          <span class="jd-rating-den">/ 5</span>
 
-        {% if biblioteca %}
+          <span class="jd-rating-stars" aria-label="Média {{ '%.1f'|format(media) }} de 5">
+            {% for _ in range(media|round(0, 'floor')|int) %}★{% endfor %}
+            {% for _ in range(5 - media|round(0, 'floor')|int) %}<span style="color: rgba(22,25,28,0.15);">★</span>{% endfor %}
+          </span>
 
-            <h3>Minha Biblioteca</h3>
+          <span class="jd-rating-meta">
+            {{ avaliacoes|length }} avaliaç{{ 'ão' if avaliacoes|length == 1 else 'ões' }}
+          </span>
+        </div>
+      {% else %}
+        <div class="jd-rating-hero">
+          <p class="jd-rating-empty">Ainda não existem avaliações. Seja o primeiro.</p>
+        </div>
+      {% endif %}
 
-            <form
-                method="POST"
-                action="{{ url_for('editar_biblioteca', id=jogo.id) }}">
-
-                {{ form_biblioteca.csrf_token }}
-
-                <div class="form-group">
-
-                    {{ form_biblioteca.status.label }}
-
-                    {{ form_biblioteca.status(
-                        class="form-control"
-                    ) }}
-
-                </div>
-
-                <div class="form-group">
-
-                    {{ form_biblioteca.favorito() }}
-
-                    {{ form_biblioteca.favorito.label }}
-
-                </div>
-
-                <button
-                    type="submit"
-                    class="btn btn-primary">
-
-                    Salvar biblioteca
-
-                </button>
-
-            </form>
-
-            <br>
-
-            <form
-                method="POST"
-                action="{{ url_for('remover_biblioteca', id=jogo.id) }}">
-
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="{{ csrf_token() }}">
-
-                <button
-                    type="submit"
-                    class="btn btn-danger">
-
-                    Remover da biblioteca
-
-                </button>
-
-            </form>
-
-        {% else %}
-
-            <form
-                method="POST"
-                action="{{ url_for('adicionar_biblioteca', id=jogo.id) }}">
-
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="{{ csrf_token() }}">
-
-                <button
-                    type="submit"
-                    class="btn btn-success">
-
-                    + Adicionar à minha biblioteca
-
-                </button>
-
-            </form>
-
-        {% endif %}
+      {# ─── Jogadores ─── #}
+      <div class="jd-players">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <strong>{{ quantidade_jogadores }}</strong>
+        {{ 'jogador possui' if quantidade_jogadores == 1 else 'jogadores possuem' }}
+        este jogo
+      </div>
 
     </div>
 
-</div>
+  </section>
 
-<hr>
+  {# ═══════════════ MINHA BIBLIOTECA ═══════════════ #}
+  <section class="jd-block">
 
-<h2>Minha avaliação</h2>
+    <div class="jd-block-head">
+      <h2 class="jd-block-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>
+        </svg>
+        Minha biblioteca
+      </h2>
+      <span class="jd-block-tag">
+        {% if biblioteca %}Na sua coleção{% else %}Fora da coleção{% endif %}
+      </span>
+    </div>
 
-<div class="card">
+    {% if biblioteca %}
 
-    <div class="card-body">
+      {# ─── Status atual ─── #}
+      <div class="jd-status-row">
+        {% set st = biblioteca.status %}
+        {% if st == 'jogando' %}
+          <span class="jd-status-pill jd-status-pill--jogando">Jogando</span>
+        {% elif st == 'concluido' %}
+          <span class="jd-status-pill jd-status-pill--concluido">Concluído</span>
+        {% elif st == 'quero_jogar' %}
+          <span class="jd-status-pill jd-status-pill--quero">Quero jogar</span>
+        {% elif st == 'pausado' %}
+          <span class="jd-status-pill jd-status-pill--pausado">Pausado</span>
+        {% elif st == 'abandonado' %}
+          <span class="jd-status-pill jd-status-pill--abandonado">Abandonado</span>
+        {% endif %}
+
+        {% if biblioteca.favorito %}
+          <span class="jd-fav-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            Favorito
+          </span>
+        {% endif %}
+      </div>
+
+      {# ─── Editar ─── #}
+      <form method="POST" action="{{ url_for('editar_biblioteca', id=jogo.id) }}">
+        {{ form_biblioteca.csrf_token() }}
+
+        <div class="jd-form-row">
+          <div class="jd-field">
+            {{ form_biblioteca.status.label(class="jd-label") }}
+            {{ form_biblioteca.status(class="jd-select") }}
+          </div>
+
+          <div class="jd-field jd-field--auto">
+            <label class="jd-label" for="{{ form_biblioteca.favorito.id }}">&nbsp;</label>
+            <label class="jd-check" for="{{ form_biblioteca.favorito.id }}">
+              {{ form_biblioteca.favorito() }}
+              <span class="jd-check-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 6 9 17l-5-5"/>
+                </svg>
+              </span>
+              Favorito
+            </label>
+          </div>
+
+          <div class="jd-field jd-field--auto">
+            <label class="jd-label">&nbsp;</label>
+            <button type="submit" class="jd-btn jd-btn--primary">
+              Salvar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div class="jd-actions-divider"></div>
+
+      {# ─── Remover ─── #}
+      <form method="POST" action="{{ url_for('remover_biblioteca', id=jogo.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="jd-btn jd-btn--danger">
+          Remover da biblioteca
+        </button>
+      </form>
+
+    {% else %}
+
+      {# ─── Adicionar ─── #}
+      <form method="POST" action="{{ url_for('adicionar_biblioteca', id=jogo.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="jd-btn jd-btn--success">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Adicionar à minha biblioteca
+        </button>
+      </form>
+
+    {% endif %}
+
+  </section>
+
+  {# ═══════════════ MINHA AVALIAÇÃO ═══════════════ #}
+  <section class="jd-block">
+
+    <div class="jd-block-head">
+      <h2 class="jd-block-title jd-block-title--green">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        Minha avaliação
+      </h2>
+      <span class="jd-block-tag">
+        {% if minha_avaliacao %}Editando{% else %}Nova{% endif %}
+      </span>
+    </div>
+
+    {% if minha_avaliacao %}
+      <div class="jd-mine-existing">
+        <div class="jd-mine-score">{{ minha_avaliacao.nota }}</div>
+        <div class="jd-mine-body">
+          <p class="jd-mine-label">Sua nota atual</p>
+          <span class="jd-review-stars">
+            {% for _ in range(minha_avaliacao.nota) %}★{% endfor %}
+            {% for _ in range(5 - minha_avaliacao.nota) %}<span style="color: rgba(22,25,28,0.15);">★</span>{% endfor %}
+          </span>
+          {% if minha_avaliacao.review %}
+            <p class="jd-mine-text">“{{ minha_avaliacao.review }}”</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('avaliar', id=jogo.id) }}">
+      {{ form_avaliacao.csrf_token() }}
+
+      <div class="jd-form-row" style="margin-bottom: 14px;">
+        <div class="jd-field jd-field--auto" style="max-width: 180px;">
+          {{ form_avaliacao.nota.label(class="jd-label") }}
+          {{ form_avaliacao.nota(
+              class="jd-input",
+              min="1",
+              max="5"
+          ) }}
+        </div>
+      </div>
+
+      <div class="jd-field" style="margin-bottom: 16px;">
+        {{ form_avaliacao.review.label(class="jd-label") }}
+        {{ form_avaliacao.review(
+            class="jd-textarea",
+            rows="4",
+            placeholder="O que você achou do jogo? (opcional)"
+        ) }}
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <button type="submit" class="jd-btn jd-btn--primary">
+          {% if minha_avaliacao %}Atualizar avaliação{% else %}Publicar avaliação{% endif %}
+        </button>
 
         {% if minha_avaliacao %}
+          <button type="submit"
+                  form="form-excluir-avaliacao"
+                  class="jd-btn jd-btn--danger">
+            Excluir avaliação
+          </button>
+        {% endif %}
+      </div>
+    </form>
 
-            <p>
-                Você já avaliou este jogo.
-            </p>
+    {% if minha_avaliacao %}
+      {# form separado só para exclusão, referenciado pelo botão acima #}
+      <form id="form-excluir-avaliacao"
+            method="POST"
+            action="{{ url_for('excluir_avaliacao', id=minha_avaliacao.id) }}"
+            style="display: none;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      </form>
+    {% endif %}
 
-            <p>
-                <strong>
-                    Nota: {{ minha_avaliacao.nota }}/5
-                </strong>
-            </p>
+  </section>
 
-            {% if minha_avaliacao.review %}
+  {# ═══════════════ COMUNIDADE ═══════════════ #}
+  <section class="jd-block">
 
-                <p>
-                    {{ minha_avaliacao.review }}
-                </p>
+    <div class="jd-block-head">
+      <h2 class="jd-block-title jd-block-title--orange">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Avaliações da comunidade
+      </h2>
+      {% if avaliacoes %}
+        <span class="jd-block-tag">
+          {{ avaliacoes|length }} {{ 'review' if avaliacoes|length == 1 else 'reviews' }}
+        </span>
+      {% endif %}
+    </div>
 
+    {% if avaliacoes %}
+
+      <div class="jd-reviews">
+        {% for avaliacao in avaliacoes %}
+          {% set is_mine = session.get('usuario_id') == avaliacao.usuario_id %}
+
+          <article class="jd-review {% if is_mine %}is-mine{% endif %}">
+
+            <header class="jd-review-head">
+
+              <a href="{{ url_for('perfil', nickname=avaliacao.usuario.nickname) }}"
+                 class="jd-review-author">
+                <span class="jd-review-avatar" aria-hidden="true">
+                  {{ avaliacao.usuario.nickname[0]|upper }}
+                </span>
+                @{{ avaliacao.usuario.nickname }}
+              </a>
+
+              {% if is_mine %}
+                <span class="jd-review-you">Você</span>
+              {% endif %}
+
+              <span class="jd-review-score">
+                <span class="jd-review-stars">
+                  {% for _ in range(avaliacao.nota) %}★{% endfor %}
+                  {% for _ in range(5 - avaliacao.nota) %}<span style="color: rgba(22,25,28,0.15);">★</span>{% endfor %}
+                </span>
+                <span class="num">{{ avaliacao.nota }}/5</span>
+              </span>
+
+            </header>
+
+            {% if avaliacao.review %}
+              <p class="jd-review-text">{{ avaliacao.review }}</p>
+            {% else %}
+              <p class="jd-review-text jd-review-text--muted">
+                Este usuário não escreveu uma review.
+              </p>
             {% endif %}
 
-            <hr>
+          </article>
+        {% endfor %}
+      </div>
 
-            <p>
-                Você pode atualizar sua avaliação abaixo.
-            </p>
+    {% else %}
 
-        {% endif %}
+      <div class="jd-empty">
+        <p class="jd-empty-text">
+          Ainda não existem avaliações para este jogo. Seja o primeiro a compartilhar sua opinião.
+        </p>
+      </div>
 
-        <form
-            method="POST"
-            action="{{ url_for('avaliar', id=jogo.id) }}">
+    {% endif %}
 
-            {{ form_avaliacao.csrf_token }}
-
-            <div class="form-group">
-
-                {{ form_avaliacao.nota.label }}
-
-                {{ form_avaliacao.nota(
-                    class="form-control"
-                ) }}
-
-            </div>
-
-            <div class="form-group">
-
-                {{ form_avaliacao.review.label }}
-
-                {{ form_avaliacao.review(
-                    class="form-control",
-                    rows="4"
-                ) }}
-
-            </div>
-
-            <button
-                type="submit"
-                class="btn btn-primary">
-
-                {% if minha_avaliacao %}
-                    Atualizar avaliação
-                {% else %}
-                    Publicar avaliação
-                {% endif %}
-
-            </button>
-
-        </form>
-
-        {% if minha_avaliacao %}
-
-            <br>
-
-            <form
-                method="POST"
-                action="{{ url_for('excluir_avaliacao', id=minha_avaliacao.id) }}">
-
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="{{ csrf_token() }}">
-
-                <button
-                    type="submit"
-                    class="btn btn-danger">
-
-                    Excluir minha avaliação
-
-                </button>
-
-            </form>
-
-        {% endif %}
-
-    </div>
-
-</div>
-
-<br>
-
-<h2>Avaliações da comunidade</h2>
-
-{% if avaliacoes %}
-
-    {% for avaliacao in avaliacoes %}
-
-        <div class="card mb-3">
-
-            <div class="card-body">
-
-                <h4>
-                    <a
-                        href="{{ url_for('perfil', nickname=avaliacao.usuario.nickname) }}">
-
-                        @{{ avaliacao.usuario.nickname }}
-
-                    </a>
-                </h4>
-
-                <p>
-
-                    <strong>
-                        {% for estrela in range(avaliacao.nota) %}
-                            ⭐
-                        {% endfor %}
-                    </strong>
-
-                    <span>
-                        {{ avaliacao.nota }}/5
-                    </span>
-
-                </p>
-
-                {% if avaliacao.review %}
-
-                    <p>
-                        {{ avaliacao.review }}
-                    </p>
-
-                {% else %}
-
-                    <p>
-                        <em>
-                            Este usuário não escreveu uma review.
-                        </em>
-                    </p>
-
-                {% endif %}
-
-                {% if session.get('usuario_id') == avaliacao.usuario_id %}
-
-                    <small>
-                        Esta é a sua avaliação.
-                    </small>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-    {% endfor %}
-
-{% else %}
-
-    <p>
-        Ainda não existem avaliações para este jogo.
-    </p>
-
-{% endif %}
-
-<br>
-
-<a
-    href="{{ url_for('explorar') }}"
-    class="btn btn-secondary">
-
-    Voltar para explorar
-
-</a>
-
+  </section>
 
 </div>
 

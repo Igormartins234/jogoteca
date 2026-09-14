@@ -1,124 +1,489 @@
 {% extends "template.html" %}
 {% block conteudo %}
 
-<div class="container">
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     Comunidade · escopo local (prefixo .cm-)
+     ═══════════════════════════════════════════════════════════ */
 
-```
-<h1>Comunidade</h1>
+  .cm-wrap { max-width: 720px; margin: 0 auto; }
 
-<p>
-    Veja o que os jogadores estão fazendo no Joteca.
-</p>
+  /* ═══ Cabeçalho ═══ */
+  .cm-head { margin-bottom: 32px; }
 
-<hr>
+  .cm-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: #00A850;
+    margin: 0 0 6px;
+  }
 
-{% if atividades %}
+  .cm-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.85rem;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #16191C;
+    margin: 0;
+  }
 
-    {% for atividade in atividades %}
+  .cm-sub {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(22,25,28,0.52);
+    max-width: 480px;
+  }
 
-        <div class="card mb-3">
+  /* ═══ Feed ═══ */
+  .cm-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-            <div class="card-body">
+  /* ═══ Card ═══ */
+  .cm-card {
+    display: flex;
+    gap: 14px;
+    padding: 16px 18px;
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(22,25,28,0.03);
+    transition: border-color .3s ease, box-shadow .3s ease, transform .3s ease;
+  }
+  .cm-card:hover {
+    border-color: rgba(0,200,83,0.20);
+    box-shadow:
+      0 2px 4px rgba(22,25,28,0.03),
+      0 14px 28px -18px rgba(22,25,28,0.12);
+    transform: translateY(-1px);
+  }
 
-                <h4>
+  @media (max-width: 560px) {
+    .cm-card { padding: 14px 14px; gap: 12px; }
+  }
 
-                    <a
-                        href="{{ url_for('perfil', nickname=atividade.usuario.nickname) }}">
+  /* ─── Avatar do usuário ─── */
+  .cm-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00C853 0%, #2979FF 100%);
+    color: #fff;
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    box-shadow:
+      0 2px 4px rgba(0,168,80,0.15),
+      0 8px 16px -8px rgba(0,168,80,0.25);
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  .cm-avatar:hover {
+    transform: scale(1.05);
+    box-shadow:
+      0 2px 4px rgba(0,168,80,0.20),
+      0 12px 22px -10px rgba(0,168,80,0.35);
+  }
+  @media (max-width: 560px) {
+    .cm-avatar { width: 34px; height: 34px; font-size: 13px; }
+  }
 
-                        @{{ atividade.usuario.nickname }}
+  /* ─── Corpo ─── */
+  .cm-body {
+    flex: 1;
+    min-width: 0;
+  }
 
-                    </a>
+  /* ─── Cabeçalho do card (autor + tipo) ─── */
+  .cm-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
 
-                </h4>
+  .cm-author {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #16191C;
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+  .cm-author:hover { color: #00A850; }
 
-                {% if atividade.tipo == 'avaliacao' %}
+  .cm-action {
+    font-size: 13px;
+    color: rgba(22,25,28,0.52);
+  }
 
-                    <p>
-                        avaliou
-                        <strong>
-                            <a
-                                href="{{ url_for('jogo', id=atividade.jogo.id) }}">
+  .cm-time {
+    margin-left: auto;
+    font-size: 11.5px;
+    color: rgba(22,25,28,0.38);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  @media (max-width: 420px) {
+    .cm-time { margin-left: 0; width: 100%; }
+  }
 
-                                {{ atividade.jogo.nome }}
+  /* ─── Linha principal ─── */
+  .cm-line {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(22,25,28,0.72);
+    margin: 0;
+  }
+  .cm-line strong {
+    color: #16191C;
+    font-weight: 500;
+  }
 
-                            </a>
-                        </strong>
-                    </p>
+  .cm-game {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #16191C;
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+  .cm-game:hover { color: #00A850; }
 
-                    <p>
+  /* ─── Rating ─── */
+  .cm-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .cm-stars {
+    display: inline-flex;
+    gap: 1px;
+    color: #E8622B;
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+  .cm-rating-num {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+  }
 
-                        {% for estrela in range(atividade.avaliacao.nota) %}
-                            ⭐
-                        {% endfor %}
+  /* ─── Review ─── */
+  .cm-review {
+    position: relative;
+    margin: 10px 0 0;
+    padding: 10px 14px 10px 15px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    font-style: italic;
+    color: rgba(22,25,28,0.68);
+    background: #FBFAF7;
+    border-radius: 10px;
+    border-left: 2px solid rgba(0,200,83,0.35);
+  }
 
-                    </p>
+  /* ─── Status pill ─── */
+  .cm-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border-radius: 999px;
+  }
+  .cm-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+  .cm-status--jogando    { background: rgba(41,121,255,0.10); color: #2979FF; }
+  .cm-status--concluido  { background: rgba(0,200,83,0.10);   color: #00A850; }
+  .cm-status--quero      { background: rgba(232,98,43,0.10);  color: #E8622B; }
+  .cm-status--pausado    { background: rgba(245,158,11,0.14); color: #B45309; }
+  .cm-status--abandonado { background: rgba(22,25,28,0.08);   color: rgba(22,25,28,0.65); }
 
-                    <p>
-                        <strong>
-                            {{ atividade.avaliacao.nota }}/5
-                        </strong>
-                    </p>
+  /* ─── Favorito ─── */
+  .cm-fav {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #E8622B;
+  }
+  .cm-fav svg { flex-shrink: 0; }
 
-                    {% if atividade.avaliacao.review %}
+  /* ─── Badge do tipo (avaliação / biblioteca) ─── */
+  .cm-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    border-radius: 5px;
+  }
+  .cm-type--avaliacao {
+    background: rgba(0,200,83,0.10);
+    color: #00A850;
+  }
+  .cm-type--biblioteca {
+    background: rgba(41,121,255,0.10);
+    color: #2979FF;
+  }
+  .cm-type svg { width: 10px; height: 10px; }
 
-                        <p>
-                            "{{ atividade.avaliacao.review }}"
-                        </p>
+  /* ═══ Estado vazio ═══ */
+  .cm-empty {
+    padding: 56px 24px;
+    text-align: center;
+    background: #FFFFFF;
+    border: 1px dashed rgba(22,25,28,0.12);
+    border-radius: 18px;
+  }
 
-                    {% endif %}
+  .cm-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(41,121,255,0.08);
+    color: #2979FF;
+    margin-bottom: 18px;
+  }
 
-                {% elif atividade.tipo == 'biblioteca' %}
+  .cm-empty-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: #16191C;
+    margin: 0 0 6px;
+  }
 
-                    <p>
+  .cm-empty-text {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgba(22,25,28,0.55);
+    margin: 0 auto 20px;
+    max-width: 340px;
+  }
 
-                        adicionou
+  .cm-empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #16191C;
+    color: #FBFAF7;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background .3s ease, transform .3s ease;
+  }
+  .cm-empty-cta:hover {
+    background: #00A850;
+    color: #fff;
+    transform: translateY(-1px);
+  }
 
-                        <strong>
-                            <a
-                                href="{{ url_for('jogo', id=atividade.jogo.id) }}">
+  /* ═══ Reduced motion ═══ */
+  @media (prefers-reduced-motion: reduce) {
+    .cm-card, .cm-avatar, .cm-author, .cm-game, .cm-empty-cta {
+      transition: none !important;
+    }
+    .cm-card:hover, .cm-avatar:hover, .cm-empty-cta:hover {
+      transform: none !important;
+    }
+  }
+</style>
 
-                                {{ atividade.jogo.nome }}
+<div class="cm-wrap">
 
-                            </a>
-                        </strong>
+  {# ═══════════════ CABEÇALHO ═══════════════ #}
+  <header class="cm-head">
+    <p class="cm-eyebrow">Atividade recente</p>
+    <h1 class="cm-title">Comunidade</h1>
+    <p class="cm-sub">
+      Veja o que os outros jogadores estão jogando, avaliando e adicionando.
+    </p>
+  </header>
 
-                        à biblioteca
+  {% if atividades %}
 
-                    </p>
+    <div class="cm-feed">
 
-                    <p>
-                        <strong>Status:</strong>
-                        {{ atividade.item.status }}
-                    </p>
+      {% for atividade in atividades %}
+        <article class="cm-card">
 
-                    {% if atividade.item.favorito %}
+          {# ─── Avatar do autor ─── #}
+          <a href="{{ url_for('perfil', nickname=atividade.usuario.nickname) }}"
+             class="cm-avatar"
+             aria-label="Perfil de {{ atividade.usuario.nickname }}">
+            {{ atividade.usuario.nickname[0]|upper }}
+          </a>
 
-                        <p>
-                            ❤️ Favorito
-                        </p>
+          <div class="cm-body">
 
-                    {% endif %}
+            {# ─── Autor + tipo + hora ─── #}
+            <div class="cm-card-head">
 
-                {% endif %}
+              <a href="{{ url_for('perfil', nickname=atividade.usuario.nickname) }}"
+                 class="cm-author">
+                @{{ atividade.usuario.nickname }}
+              </a>
 
-                <small>
-                    {{ atividade.data.strftime('%d/%m/%Y às %H:%M') }}
-                </small>
+              {% if atividade.tipo == 'avaliacao' %}
+                <span class="cm-type cm-type--avaliacao">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  Avaliou
+                </span>
+              {% elif atividade.tipo == 'biblioteca' %}
+                <span class="cm-type cm-type--biblioteca">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="3" stroke-linecap="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  Adicionou
+                </span>
+              {% endif %}
+
+              <span class="cm-time">
+                {{ atividade.data.strftime('%d/%m às %H:%M') }}
+              </span>
 
             </div>
 
-        </div>
+            {# ═══ AVALIAÇÃO ═══ #}
+            {% if atividade.tipo == 'avaliacao' %}
 
-    {% endfor %}
+              <p class="cm-line">
+                avaliou
+                <a href="{{ url_for('jogo', id=atividade.jogo.id) }}" class="cm-game">
+                  {{ atividade.jogo.nome }}
+                </a>
+              </p>
 
-{% else %}
+              <div class="cm-rating">
+                <span class="cm-stars" aria-label="Nota {{ atividade.avaliacao.nota }} de 5">
+                  {% for _ in range(atividade.avaliacao.nota) %}★{% endfor %}
+                  {% for _ in range(5 - atividade.avaliacao.nota) %}<span style="color: rgba(22,25,28,0.15);">★</span>{% endfor %}
+                </span>
+                <span class="cm-rating-num">
+                  {{ atividade.avaliacao.nota }}/5
+                </span>
+              </div>
 
-    <p>
-        Ainda não existem atividades na comunidade.
-    </p>
+              {% if atividade.avaliacao.review %}
+                <blockquote class="cm-review">
+                  “{{ atividade.avaliacao.review }}”
+                </blockquote>
+              {% endif %}
 
-{% endif %}
-```
+            {# ═══ BIBLIOTECA ═══ #}
+            {% elif atividade.tipo == 'biblioteca' %}
+
+              <p class="cm-line">
+                adicionou
+                <a href="{{ url_for('jogo', id=atividade.jogo.id) }}" class="cm-game">
+                  {{ atividade.jogo.nome }}
+                </a>
+                à biblioteca
+              </p>
+
+              {% set st = atividade.item.status %}
+              {% if st == 'jogando' %}
+                <span class="cm-status cm-status--jogando">Jogando</span>
+              {% elif st == 'concluido' %}
+                <span class="cm-status cm-status--concluido">Concluído</span>
+              {% elif st == 'quero_jogar' %}
+                <span class="cm-status cm-status--quero">Quero jogar</span>
+              {% elif st == 'pausado' %}
+                <span class="cm-status cm-status--pausado">Pausado</span>
+              {% elif st == 'abandonado' %}
+                <span class="cm-status cm-status--abandonado">Abandonado</span>
+              {% elif st %}
+                <span class="cm-status cm-status--abandonado">{{ st }}</span>
+              {% endif %}
+
+              {% if atividade.item.favorito %}
+                <span class="cm-fav">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                  Favorito
+                </span>
+              {% endif %}
+
+            {% endif %}
+
+          </div>
+
+        </article>
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    {# ═══════════════ VAZIO ═══════════════ #}
+    <div class="cm-empty">
+      <div class="cm-empty-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+
+      <h3 class="cm-empty-title">Ainda não há atividade por aqui</h3>
+      <p class="cm-empty-text">
+        Quando os jogadores começarem a avaliar e adicionar jogos, você verá tudo nesta página.
+      </p>
+
+      <a href="{{ url_for('explorar') }}" class="cm-empty-cta">
+        Explorar jogos
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+          <path d="M5 12h14M13 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+
+  {% endif %}
 
 </div>
 

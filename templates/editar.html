@@ -1,36 +1,496 @@
 {% extends "template.html" %}
 {% block conteudo %}
-      <form class="formularioJogo" action="{{ url_for('atualizar') }}" method="post" enctype="multipart/form-data">
 
-        <figure class="img thumbnail col-md-4 formularioImagem">
-          <img class="img-fluid" src="{{ url_for('imagem', nome_arquivo=capa_jogo) }}">
-          <figcaption>
-            <label class="fileContainer">
-              Mudar Capa
-              <input type="file" name="arquivo" accept=".jpg">
-            </label>
-          </figcaption>
-        </figure>
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     Editar jogo · escopo local (prefixo .ej-)
+     ═══════════════════════════════════════════════════════════ */
 
-        <fieldset>
-          <input type="hidden" name="id" value="{{ id }}">
-          {{ form.csrf_token() }}
-          <div class="form-group inputBox">
-            {{ form.nome.label(class="form-label") }}
-            {{ form.nome(class="form-control") }}
+  .ej-wrap { max-width: 720px; margin: 0 auto; }
+
+  /* ═══ Cabeçalho ═══ */
+  .ej-head { margin-bottom: 26px; }
+
+  .ej-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: #00A850;
+    margin: 0 0 6px;
+  }
+
+  .ej-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.85rem;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #16191C;
+    margin: 0;
+  }
+
+  .ej-btn--delete {
+    background: #FFF1F1;
+    color: #C62828;
+    border: 1px solid rgba(198, 40, 40, 0.15);
+}
+
+.ej-btn--delete:hover {
+    background: #C62828;
+    color: #FFFFFF;
+    border-color: #C62828;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -12px rgba(198, 40, 40, 0.45);
+}
+  .ej-sub {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(22,25,28,0.52);
+  }
+
+  .ej-btn--delete {
+      background: #FFF1F1;
+      color: #C62828;
+      border: 1px solid rgba(198, 40, 40, 0.15);
+  }
+
+.ej-btn--delete:hover {
+    background: #C62828;
+    color: #FFFFFF;
+    border-color: #C62828;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -12px rgba(198, 40, 40, 0.45);
+}
+  /* ═══ Cartão ═══ */
+  .ej-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 18px;
+    padding: 28px 26px;
+    box-shadow:
+      0 1px 2px rgba(22,25,28,0.03),
+      0 20px 44px -28px rgba(22,25,28,0.12);
+  }
+  @media (max-width: 560px) {
+    .ej-card { padding: 22px 18px; border-radius: 16px; }
+  }
+
+  /* ═══ Grid interno: capa | campos ═══ */
+  .ej-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 26px;
+    align-items: start;
+  }
+  @media (max-width: 620px) {
+    .ej-layout {
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+  }
+
+  /* ═══ Capa ═══ */
+  .ej-cover-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ej-cover {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #EFEDE8;
+    border: 1px solid rgba(22,25,28,0.06);
+    box-shadow:
+      0 1px 2px rgba(22,25,28,0.04),
+      0 14px 30px -18px rgba(22,25,28,0.18);
+  }
+  @media (max-width: 620px) {
+    .ej-cover { max-width: 160px; margin: 0 auto; }
+  }
+
+  .ej-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ej-cover-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #EFEDE8 0%, #E3E1DB 100%);
+    color: rgba(22,25,28,0.18);
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 3rem;
+    font-weight: 500;
+    user-select: none;
+  }
+
+  /* ─── Botão "Mudar capa" ─── */
+  .ej-cover-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: rgba(22,25,28,0.72);
+    background-color: #F5F3EF;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: background-color .25s ease, border-color .25s ease,
+                color .25s ease, transform .25s ease;
+    text-align: center;
+  }
+  .ej-cover-btn:hover {
+    background-color: #F0EEE9;
+    border-color: rgba(0,200,83,0.30);
+    color: #00A850;
+    transform: translateY(-1px);
+  }
+  .ej-cover-btn:active { transform: translateY(0); }
+
+  .ej-cover-btn input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ej-cover-btn svg {
+    flex-shrink: 0;
+    transition: transform .3s ease;
+  }
+  .ej-cover-btn:hover svg { transform: translateY(-1px); }
+
+  .ej-cover-hint {
+    font-size: 11px;
+    line-height: 1.5;
+    color: rgba(22,25,28,0.42);
+    text-align: center;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ej-cover-hint.is-picked {
+    color: #00A850;
+    font-weight: 500;
+  }
+
+  /* ═══ Campos ═══ */
+  .ej-fields { display: flex; flex-direction: column; }
+
+  .ej-field { margin-bottom: 16px; }
+  .ej-field:last-of-type { margin-bottom: 0; }
+
+  .ej-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(22,25,28,0.48);
+    margin: 0 0 7px 2px;
+  }
+
+  .ej-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: #16191C;
+    background-color: #F5F3EF;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    outline: none;
+    transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+    -webkit-appearance: none;
+            appearance: none;
+  }
+  .ej-input::placeholder { color: rgba(22,25,28,0.32); }
+
+  .ej-input:hover { background-color: #F0EEE9; }
+
+  .ej-input:focus {
+    background-color: #FFFFFF;
+    border-color: #00C853;
+    box-shadow: 0 0 0 4px rgba(0,200,83,0.12);
+  }
+
+  .ej-input.is-invalid {
+    background-color: #FFF6F1;
+    border-color: #E8622B;
+  }
+  .ej-input.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(232,98,43,0.12);
+  }
+
+  /* ═══ Ações ═══ */
+  .ej-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(22,25,28,0.07);
+  }
+  @media (max-width: 480px) {
+    .ej-actions { flex-direction: column-reverse; align-items: stretch; }
+  }
+
+  .ej-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 44px;
+    padding: 0 22px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border: 0;
+    border-radius: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background .3s ease, color .3s ease, border-color .3s ease,
+                transform .3s ease, box-shadow .3s ease;
+  }
+  .ej-btn:active { transform: translateY(1px); }
+
+  .ej-btn--primary {
+    background: #16191C;
+    color: #FBFAF7;
+    flex: 1;
+  }
+  .ej-btn--primary:hover {
+    background: #00A850;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -12px rgba(0,168,80,0.55);
+  }
+
+  .ej-btn--ghost {
+    background: transparent;
+    color: rgba(22,25,28,0.55);
+    border: 1px solid rgba(22,25,28,0.10);
+  }
+  .ej-btn--ghost:hover {
+    color: #16191C;
+    background: rgba(22,25,28,0.03);
+    border-color: rgba(22,25,28,0.16);
+  }
+
+  @media (max-width: 480px) {
+    .ej-btn { width: 100%; }
+    .ej-btn--primary { flex: 0 0 auto; }
+  }
+
+  /* ═══ Reduced motion ═══ */
+  @media (prefers-reduced-motion: reduce) {
+    .ej-input, .ej-cover-btn, .ej-cover-btn svg, .ej-btn {
+      transition: none !important;
+    }
+    .ej-btn:hover, .ej-cover-btn:hover, .ej-cover-btn:hover svg { transform: none !important; }
+  }
+</style>
+
+<div class="ej-wrap">
+
+  {# ═══════════════ CABEÇALHO ═══════════════ #}
+  <header class="ej-head">
+    <p class="ej-eyebrow">Catálogo</p>
+    <h1 class="ej-title">Editar jogo</h1>
+    <p class="ej-sub">
+      Atualize as informações ou troque a capa. As alterações valem para todos.
+    </p>
+  </header>
+
+  {# ═══════════════ CARTÃO ═══════════════ #}
+  <div class="ej-card">
+
+    <form class="ej-form"
+          action="{{ url_for('atualizar') }}"
+          method="post"
+          enctype="multipart/form-data"
+          id="ej-form"
+          novalidate>
+
+      <input type="hidden" name="id" value="{{ id }}">
+      {{ form.csrf_token() }}
+
+      <div class="ej-layout">
+
+        {# ─── Capa ─── #}
+        <div class="ej-cover-block">
+
+          <div class="ej-cover">
+            {% if capa_jogo %}
+              <img src="{{ url_for('imagem', nome_arquivo=capa_jogo) }}"
+                   alt="Capa atual de {{ form.nome.data or 'jogo' }}">
+            {% else %}
+              <div class="ej-cover-fallback">
+                <span>{{ (form.nome.data or 'J')[0]|upper }}</span>
+              </div>
+            {% endif %}
           </div>
-          <div class="form-group inputBox">
-            {{ form.categoria.label(class="form-label") }}
-            {{ form.categoria(class="form-control") }}
+
+          <label class="ej-cover-btn" for="arquivo">
+            <input type="file"
+                   name="arquivo"
+                   id="arquivo"
+                   accept="image/jpeg, image/png, image/webp">
+
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Mudar capa
+          </label>
+
+          <p class="ej-cover-hint" id="ej-cover-hint">
+            JPG, PNG ou WEBP · recomendado 2:3
+          </p>
+
+        </div>
+
+        {# ─── Campos ─── #}
+        <div class="ej-fields">
+
+          <div class="ej-field">
+            {{ form.nome.label(class="ej-label") }}
+            {{ form.nome(
+                class="ej-input",
+                placeholder="Nome do jogo",
+                autocomplete="off",
+                autofocus=true,
+                **{"data-validate": "required"}
+            ) }}
           </div>
-          <div class="form-group inputBox">
-            {{ form.console.label(class="form-label") }}
-            {{ form.console(class="form-control") }}
+
+          <div class="ej-field">
+            {{ form.categoria.label(class="ej-label") }}
+            {{ form.categoria(
+                class="ej-input",
+                placeholder="Ex: Metroidvania",
+                autocomplete="off",
+                **{"data-validate": "required"}
+            ) }}
           </div>
-          <div class="form-group buttons">
-            {{ form.salvar(class="btn btn-primary") }}
-            <a class="btn btn-danger" href="{{ url_for('index') }}">Voltar</a>
+
+          <div class="ej-field">
+            {{ form.console.label(class="ej-label") }}
+            {{ form.console(
+                class="ej-input",
+                placeholder="Ex: PC, PS5, Switch",
+                autocomplete="off",
+                **{"data-validate": "required"}
+            ) }}
           </div>
-        </fieldset>
-      </form>
+
+        </div>
+
+      </div>
+
+      <div class="ej-actions">
+
+          <a href="{{ url_for('deletar', id=id) }}"
+            class="ej-btn ej-btn--delete"
+            onclick="return confirm('Tem certeza que deseja excluir este jogo? Esta ação não pode ser desfeita.');">
+              Excluir jogo
+          </a>
+
+          <a href="{{ url_for('index') }}" class="ej-btn ej-btn--ghost">
+              Voltar
+          </a>
+
+          {{ form.salvar(
+              class="ej-btn ej-btn--primary",
+              **{"data-label": "Salvar alterações"}
+          ) }}
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script>
+  (function () {
+    var input = document.getElementById('arquivo');
+    var hint  = document.getElementById('ej-cover-hint');
+    var form  = document.getElementById('ej-form');
+    if (!input || !form) return;
+
+    /* ─── Preview do nome do arquivo escolhido ─── */
+    input.addEventListener('change', function () {
+      var file = this.files && this.files[0];
+      if (!file) {
+        hint.textContent = 'JPG, PNG ou WEBP · recomendado 2:3';
+        hint.classList.remove('is-picked');
+        return;
+      }
+
+      hint.textContent = '✓ ' + file.name;
+      hint.classList.add('is-picked');
+
+      /* Preview imediato da nova capa (opcional) */
+      if (file.type.startsWith('image/')) {
+        var cover = document.querySelector('.ej-cover');
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var img = cover.querySelector('img');
+          if (!img) {
+            cover.innerHTML = '<img alt="">';
+            img = cover.querySelector('img');
+          }
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    /* ─── Validação simples ─── */
+    var fields = form.querySelectorAll('[data-validate="required"]');
+
+    fields.forEach(function (el) {
+      el.addEventListener('input', function () {
+        if (el.value.trim()) el.classList.remove('is-invalid');
+      });
+    });
+
+    form.addEventListener('submit', function (e) {
+      var ok = true;
+      fields.forEach(function (el) {
+        if (!el.value.trim()) {
+          el.classList.add('is-invalid');
+          if (ok) el.focus();
+          ok = false;
+        }
+      });
+      if (!ok) e.preventDefault();
+    });
+  })();
+</script>
+
 {% endblock %}

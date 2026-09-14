@@ -43,7 +43,9 @@ TABLES['Jogos'] = ('''
       `nome` varchar(50) NOT NULL,
       `categoria` varchar(40) NOT NULL,
       `console` varchar(20) NOT NULL,
-      PRIMARY KEY (`id`)
+      `usuario_id` int(11) NOT NULL,
+      PRIMARY KEY (`id`),
+      FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;''')
 
 TABLES['Biblioteca'] = ('''
@@ -67,7 +69,7 @@ TABLES['Avaliacoes'] = ('''
       `usuario_id` int(11) NOT NULL,
       `jogo_id` int(11) NOT NULL,
       `nota` int(11) NOT NULL,
-      `review` text NOT NULL,
+      `review` text NULL,
       `data` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (`id`),
       UNIQUE KEY `usuario_jogo` (`usuario_id`, `jogo_id`),
@@ -105,17 +107,20 @@ print('------------- Usuários: -------------')
 for user in cursor.fetchall():
     print(user[0], user[1], user[2])
 
-jogos_sql = 'INSERT INTO jogos (nome, categoria, console) VALUES (%s, %s, %s)'
+jogos_sql = '''
+    INSERT INTO jogos (nome, categoria, console, usuario_id)
+    VALUES (%s, %s, %s, %s)
+'''
 
 jogos = [
-    ('Tetris', 'Puzzle', 'Atari'),
-    ('God of War', 'Ação', 'PS2'),
-    ('Mortal Kombat', 'Luta', 'PS2'),
-    ('Valorant', 'FPS', 'PC'),
-    ('Crash Bandicoot', 'Plataforma', 'PS2'),
-    ('Need for Speed', 'Corrida', 'PS2'),
-    ('Minecraft', 'Sandbox', 'PC'),
-    ('Spider-Man', 'Ação', 'PS5')
+    ('Tetris', 'Puzzle', 'Atari', 1),
+    ('God of War', 'Ação', 'PS2', 1),
+    ('Mortal Kombat', 'Luta', 'PS2', 2),
+    ('Valorant', 'FPS', 'PC', 2),
+    ('Crash Bandicoot', 'Plataforma', 'PS2', 3),
+    ('Need for Speed', 'Corrida', 'PS2', 3),
+    ('Minecraft', 'Sandbox', 'PC', 1),
+    ('Spider-Man', 'Ação', 'PS5', 2)
 ]
 
 cursor.executemany(jogos_sql, jogos)
@@ -133,15 +138,8 @@ biblioteca_sql = '''
 '''
 
 biblioteca = [
-    (1, 1, 'concluido', 0),
-    (1, 2, 'concluido', 1),
-    (1, 8, 'quero_jogar', 1),
-    (2, 2, 'quero_jogar', 0),
-    (2, 3, 'jogando', 1),
-    (2, 7, 'concluido', 0),
-    (3, 5, 'concluido', 1),
-    (3, 6, 'jogando', 0),
-    (3, 8, 'quero_jogar', 0)
+    (jogo[4], jogo[0], 'quero_jogar', 0)
+    for jogo in jogos
 ]
 
 cursor.executemany(biblioteca_sql, biblioteca)

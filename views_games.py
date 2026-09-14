@@ -56,6 +56,10 @@ def explorar():
         )
 
     jogos = consulta.order_by(Jogos.nome).all()
+    capas_jogos = {}
+
+    for jogo in jogos:
+        capas_jogos[jogo.id] = recupera_imagem(jogo.id)
 
     categorias = db.session.query(
         Jogos.categoria
@@ -69,6 +73,7 @@ def explorar():
         'explorar.html',
         titulo='Explorar',
         jogos=jogos,
+        capas_jogos=capas_jogos,
         categorias=[categoria[0] for categoria in categorias],
         consoles=[console[0] for console in consoles],
         busca=busca,
@@ -158,15 +163,29 @@ def criar():
         flash('Esse jogo já está no catálogo!')
         return redirect(url_for('jogo', id=jogo.id))
 
+    # Cria o jogo
     novo_jogo = Jogos(
         nome=nome,
         categoria=categoria,
-        console=console
+        console=console,
+        usuario_id=session['usuario_id']
     )
 
     db.session.add(novo_jogo)
+    db.session.flush()
+
+    # Adiciona automaticamente à biblioteca
+    biblioteca = Biblioteca(
+        usuario_id=session['usuario_id'],
+        jogo_id=novo_jogo.id,
+        status='quero_jogar',
+        favorito=False
+    )
+
+    db.session.add(biblioteca)
     db.session.commit()
 
+    # Salva a capa
     arquivo = request.files.get('arquivo')
 
     if arquivo and arquivo.filename:
@@ -177,10 +196,9 @@ def criar():
             f'{upload_path}/capa{novo_jogo.id}-{timestamp}.jpg'
         )
 
-    flash('Jogo adicionado ao catálogo!')
+    flash('Jogo adicionado ao catálogo e à sua biblioteca!')
 
     return redirect(url_for('jogo', id=novo_jogo.id))
-
 
 @app.route('/jogo/<int:id>')
 def jogo(id):
@@ -251,6 +269,11 @@ def avaliar(id):
     jogo = Jogos.query.get_or_404(id)
 
     form = FormularioAvaliacao(request.form)
+
+    if form.nota.data is not None:
+        if form.nota.data < 1 or form.nota.data > 5:
+            flash('A nota deve estar entre 1 e 5.')
+            return redirect(url_for('jogo', id=id))
 
     if not form.validate_on_submit():
         flash('Não foi possível publicar a avaliação.')
@@ -387,7 +410,13 @@ def editar(id):
     if 'usuario_id' not in session:
         return redirect(url_for('login', proxima=url_for('editar', id=id)))
 
-    jogo = Jogos.query.get_or_404(id)
+    
+    jogo = Jogos.query.filter_by(id=id,usuario_id=session['usuario_id']).first()
+
+    if not jogo:
+        flash('Você só pode editar jogos que você adicionou ao catálogo.')
+        return redirect(url_for('jogo', id=id))
+
 
     form = FormularioJogo()
     form.nome.data = jogo.nome
@@ -412,11 +441,16 @@ def atualizar():
 
     form = FormularioJogo(request.form)
 
+    id_jogo = request.form.get('id')
+
     if not form.validate_on_submit():
         flash('Preencha os campos corretamente.')
-        return redirect(url_for('editar', id=request.form['id']))
+        return redirect(url_for('editar', id=id_jogo))
 
-    jogo = Jogos.query.get(request.form['id'])
+    jogo = Jogos.query.filter_by(
+        id=id_jogo,
+        usuario_id=session['usuario_id']
+    ).first()
 
     if not jogo:
         flash('Jogo não encontrado!')
@@ -425,8 +459,6 @@ def atualizar():
     jogo.nome = form.nome.data
     jogo.categoria = form.categoria.data
     jogo.console = form.console.data
-
-    db.session.commit()
 
     arquivo = request.files.get('arquivo')
 
@@ -440,17 +472,17 @@ def atualizar():
             f'{upload_path}/capa{jogo.id}-{timestamp}.jpg'
         )
 
+    db.session.commit()
+
     flash('Jogo atualizado com sucesso!')
 
     return redirect(url_for('jogo', id=jogo.id))
-
-
 @app.route('/deletar/<int:id>')
 def deletar(id):
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
 
-    jogo = Jogos.query.get_or_404(id)
+    jogo = Jogos.query.filter_by(id=id,usuario_id=session['usuario_id']).first_or_404()
 
     biblioteca = Biblioteca.query.filter_by(
         jogo_id=id

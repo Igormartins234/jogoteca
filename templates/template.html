@@ -1,137 +1,164 @@
 <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if titulo %}{{ titulo }} · {% endif %}GameHub</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{% if titulo %}{{ titulo }} - {% endif %}GameHub</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
-    </head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+</head>
 
-```
-<body>
+<body class="gh-body">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container">
+  <!-- ═══ HEADER ═══ -->
+  <header class="gh-header">
+    <div class="gh-header-inner">
 
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                GameHub
-            </a>
+      <!-- logo -->
+      <a href="{{ url_for('index') }}" class="gh-logo">
+        <svg viewBox="0 0 44 30" class="gh-logo-mark" aria-hidden="true">
+          <circle cx="13" cy="15" r="11" fill="#2979FF" opacity="0.9"/>
+          <circle cx="31" cy="15" r="11" fill="#FF6D00" opacity="0.9"/>
+          <circle cx="22" cy="15" r="11" fill="#00C853"/>
+          <path d="M17.2 13.4h2.1v-1.2a0.9 0.9 0 1 1 1.8 0v1.2h1.2a0.9 0.9 0 1 1 0 1.8H21v1.2a0.9 0.9 0 1 1-1.8 0v-1.2h-2.1a0.9 0.9 0 1 1 0-1.8Z" fill="#FBFAF7"/>
+          <circle cx="26.6" cy="13.6" r="0.9" fill="#FBFAF7"/>
+          <circle cx="28.6" cy="15.2" r="0.9" fill="#FBFAF7"/>
+          <circle cx="26.6" cy="16.8" r="0.9" fill="#FBFAF7"/>
+          <circle cx="24.6" cy="15.2" r="0.9" fill="#FBFAF7"/>
+        </svg>
+        <span class="gh-logo-text">Game<span>Hub</span></span>
+      </a>
 
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+      <!-- navegação desktop -->
+      <nav class="gh-nav">
+        <a href="{{ url_for('index') }}"
+           class="gh-nav-link {% if request.endpoint == 'index' %}is-active{% endif %}">Início</a>
 
-            <div class="collapse navbar-collapse" id="menu">
+        <a href="{{ url_for('explorar') }}"
+           class="gh-nav-link {% if request.endpoint == 'explorar' %}is-active{% endif %}">Explorar</a>
 
-                <ul class="navbar-nav mr-auto">
+        <a href="{{ url_for('biblioteca') }}"
+           class="gh-nav-link {% if request.endpoint == 'biblioteca' %}is-active{% endif %}">Biblioteca</a>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            Início
-                        </a>
-                    </li>
+        <a href="{{ url_for('diario') }}"
+           class="gh-nav-link {% if request.endpoint == 'diario' %}is-active{% endif %}">Diário</a>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('explorar') }}">
-                            Explorar
-                        </a>
-                    </li>
+        <a href="{{ url_for('comunidade') }}"
+           class="gh-nav-link {% if request.endpoint == 'comunidade' %}is-active{% endif %}">Comunidade</a>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('biblioteca') }}">
-                            Minha Biblioteca
-                        </a>
-                    </li>
+        <a href="{{ url_for('estatisticas') }}"
+           class="gh-nav-link {% if request.endpoint == 'estatisticas' %}is-active{% endif %}">Estatísticas</a>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('diario') }}">
-                            Diário
-                        </a>
-                    </li>
+        <a href="{{ url_for('novo') }}"
+           class="gh-nav-link {% if request.endpoint == 'novo' %}is-active{% endif %}">Adicionar</a>
+      </nav>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('comunidade') }}">
-                            Comunidade
-                        </a>
-                    </li>
+      <!-- área do usuário -->
+      <div class="gh-user">
+        {% if session.get('usuario_logado') %}
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('estatisticas') }}">
-                            Estatísticas
-                        </a>
-                    </li>
+          <a href="{{ url_for('perfil', nickname=session['usuario_logado']) }}" class="gh-user-chip">
+            <span class="gh-user-avatar">{{ session['usuario_logado'][0]|upper }}</span>
+            <span class="gh-user-name">@{{ session['usuario_logado'] }}</span>
+          </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('novo') }}">
-                            Adicionar Jogo
-                        </a>
-                    </li>
+          <a href="{{ url_for('logout') }}" class="gh-logout">Sair</a>
 
-                </ul>
+        {% else %}
 
-                {% if session.get('usuario_logado') %}
+          <a href="{{ url_for('login') }}" class="gh-btn-primary">Entrar</a>
 
-                <a
-                    class="navbar-text mr-3"
-                    href="{{ url_for('perfil', nickname=session['usuario_logado']) }}">
+        {% endif %}
+      </div>
 
-                    @{{ session['usuario_logado'] }}
-
-                </a>
-
-                <a class="btn btn-outline-light" href="{{ url_for('logout') }}">
-                    Sair
-                </a>
-
-                {% else %}
-
-                <a class="btn btn-outline-light" href="{{ url_for('login') }}">
-                    Entrar
-                </a>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-    </nav>
-
-    <div class="container">
-
-        {% with messages = get_flashed_messages() %}
-
-            {% if messages %}
-
-                <ul id="messages" class="list-unstyled">
-
-                    {% for message in messages %}
-
-                        <li class="alert alert-success">
-                            {{ message }}
-                        </li>
-
-                    {% endfor %}
-
-                </ul>
-
-            {% endif %}
-
-        {% endwith %}
-
-        <div class="page-header">
-            <h1>{{ titulo }}</h1>
-        </div>
-
-        {% block conteudo %}{% endblock %}
+      <!-- botão hamburguer (mobile) -->
+      <button type="button" id="gh-menu-toggle" class="gh-menu-toggle"
+              aria-label="Abrir menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="20" height="20">
+          <line x1="4" y1="7" x2="20" y2="7"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+      </button>
 
     </div>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='app.js') }}"></script>
+    <!-- menu mobile -->
+    <div id="gh-mobile-menu" class="gh-mobile-menu">
+      <nav class="gh-mobile-nav">
+        <a href="{{ url_for('index') }}" class="gh-mobile-link">Início</a>
+        <a href="{{ url_for('explorar') }}" class="gh-mobile-link">Explorar</a>
+        <a href="{{ url_for('biblioteca') }}" class="gh-mobile-link">Minha Biblioteca</a>
+        <a href="{{ url_for('diario') }}" class="gh-mobile-link">Diário</a>
+        <a href="{{ url_for('comunidade') }}" class="gh-mobile-link">Comunidade</a>
+        <a href="{{ url_for('estatisticas') }}" class="gh-mobile-link">Estatísticas</a>
+        <a href="{{ url_for('novo') }}" class="gh-mobile-link">Adicionar Jogo</a>
+
+        <div class="gh-mobile-divider"></div>
+
+        {% if session.get('usuario_logado') %}
+          <a href="{{ url_for('perfil', nickname=session['usuario_logado']) }}" class="gh-mobile-link">
+            @{{ session['usuario_logado'] }}
+          </a>
+          <a href="{{ url_for('logout') }}" class="gh-mobile-link">Sair</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="gh-mobile-link">Entrar</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="gh-main">
+    <div class="gh-container">
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="gh-flashes">
+            {% for message in messages %}
+              <div class="gh-flash">
+                <span class="gh-flash-dot"></span>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block conteudo %}{% endblock %}
+
+    </div>
+  </main>
+
+  <!-- ═══ SCRIPTS ═══ -->
+  <script>
+    (function () {
+      var btn  = document.getElementById('gh-menu-toggle');
+      var menu = document.getElementById('gh-mobile-menu');
+      if (!btn || !menu) return;
+
+      btn.addEventListener('click', function () {
+        var open = menu.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+
+      menu.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          menu.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+        });
+      });
+    })();
+  </script>
+
+  <script type="text/javascript" src="{{ url_for('static', filename='jquery.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>
-
-
 </html>

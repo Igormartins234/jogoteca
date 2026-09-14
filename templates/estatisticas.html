@@ -1,204 +1,460 @@
 {% extends "template.html" %}
 {% block conteudo %}
 
-<div class="container">
+<style>
+  /* ═══ Escopo local — não vaza para o resto do site ═══ */
+  .gh-stats {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: #16191C;
+    -webkit-font-smoothing: antialiased;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 56px;
+  }
+  @media (max-width: 640px) {
+    .gh-stats { padding: 28px 18px 40px; }
+  }
 
-```
-<h1>Minhas Estatísticas</h1>
+  /* ─── Cabeçalho ─── */
+  .gh-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #00A850;
+    margin: 0 0 8px;
+  }
+  .gh-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: #16191C;
+  }
+  .gh-title .muted { color: rgba(22,25,28,0.45); }
+  .gh-subtitle {
+    margin: 12px 0 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(22,25,28,0.55);
+    max-width: 460px;
+  }
 
-<p>
-    Veja seus números no Joteca.
-</p>
+  /* ─── Grid ─── */
+  .gh-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 32px;
+  }
+  @media (max-width: 720px) {
+    .gh-grid { grid-template-columns: 1fr 1fr; }
+    .gh-grid .gh-stat:last-child { grid-column: span 2; }
+  }
+  @media (max-width: 420px) {
+    .gh-grid { grid-template-columns: 1fr; }
+    .gh-grid .gh-stat:last-child { grid-column: auto; }
+  }
 
-<hr>
+  /* ─── Card de número ─── */
+  .gh-stat {
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 16px;
+    padding: 18px 18px 20px;
+    box-shadow: 0 1px 2px rgba(22,25,28,0.03);
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, border-color .35s;
+  }
+  .gh-stat:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0,200,83,0.18);
+    box-shadow: 0 2px 4px rgba(22,25,28,0.03), 0 16px 32px -16px rgba(22,25,28,0.10);
+  }
+  .gh-stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+  .gh-stat-icon svg { width: 16px; height: 16px; }
+  .gh-stat-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(22,25,28,0.42);
+  }
+  .gh-stat-value {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+  }
 
-<div class="row">
+  /* ─── Bloco grande (média, breakdowns) ─── */
+  .gh-block {
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(22,25,28,0.03);
+    margin-top: 16px;
+  }
+  @media (max-width: 640px) {
+    .gh-block { padding: 20px 18px; border-radius: 16px; }
+  }
+  .gh-block-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .gh-block-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: #16191C;
+    margin: 0;
+  }
+  .gh-block-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(22,25,28,0.35);
+  }
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h3>Jogos na biblioteca</h3>
-                <h2>{{ total_jogos }}</h2>
-            </div>
-        </div>
+  /* ─── Média ─── */
+  .gh-score {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .gh-score-num {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+  }
+  .gh-score-den {
+    font-size: 15px;
+    color: rgba(22,25,28,0.40);
+  }
+  .gh-stars {
+    margin-left: auto;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: #E8622B;
+  }
+  @media (max-width: 480px) {
+    .gh-stars { margin-left: 0; width: 100%; margin-top: 6px; }
+  }
+  .gh-score-note {
+    margin: 14px 0 0;
+    font-size: 12.5px;
+    color: rgba(22,25,28,0.45);
+  }
+  .gh-empty {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(22,25,28,0.50);
+  }
+
+  /* ─── Breakdown ─── */
+  .gh-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gh-row {
+    display: grid;
+    grid-template-columns: minmax(76px, 1fr) 2.4fr auto;
+    align-items: center;
+    gap: 12px;
+  }
+  @media (max-width: 400px) {
+    .gh-row { grid-template-columns: 1fr auto; gap: 8px; }
+    .gh-row .gh-bar { grid-column: span 2; }
+  }
+  .gh-name {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: rgba(22,25,28,0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gh-bar {
+    position: relative;
+    display: block;
+    height: 6px;
+    background: rgba(22,25,28,0.05);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .gh-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    border-radius: 999px;
+    transition: width .9s cubic-bezier(.2,.8,.2,1);
+  }
+  .gh-count {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #16191C;
+    font-variant-numeric: tabular-nums;
+    min-width: 20px;
+    text-align: right;
+  }
+
+  /* ─── Botão voltar ─── */
+  .gh-back-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+  }
+  .gh-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border: 1px solid rgba(22,25,28,0.10);
+    background: #FFFFFF;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(22,25,28,0.70);
+    text-decoration: none;
+    transition: border-color .3s, background .3s, color .3s, transform .3s;
+  }
+  .gh-back:hover {
+    border-color: rgba(0,200,83,0.30);
+    background: rgba(0,200,83,0.04);
+    color: #16191C;
+    transform: translateY(-1px);
+  }
+  .gh-back svg { transition: transform .3s; }
+  .gh-back:hover svg { transform: translateX(-3px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gh-stat, .gh-fill, .gh-back, .gh-back svg { transition: none !important; }
+    .gh-stat:hover, .gh-back:hover { transform: none !important; }
+  }
+</style>
+
+<div class="gh-stats">
+
+  {# ─── Cabeçalho ─── #}
+  <header>
+    <p class="gh-eyebrow">Sua jornada</p>
+    <h1 class="gh-title">
+      Minhas <span class="muted">estatísticas</span>
+    </h1>
+    <p class="gh-subtitle">
+      Um retrato silencioso do que você já jogou, está jogando e ainda quer jogar.
+    </p>
+  </header>
+
+  {# ─── Números principais ─── #}
+  <section class="gh-grid">
+
+    <div class="gh-stat">
+      <div class="gh-stat-icon" style="background: rgba(0,200,83,0.10); color: #00A850;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>
+        </svg>
+      </div>
+      <span class="gh-stat-label">Biblioteca</span>
+      <span class="gh-stat-value">{{ total_jogos or 0 }}</span>
     </div>
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h3>Concluídos</h3>
-                <h2>{{ concluidos }}</h2>
-            </div>
-        </div>
+    <div class="gh-stat">
+      <div class="gh-stat-icon" style="background: rgba(0,200,83,0.10); color: #00A850;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 6 9 17l-5-5"/>
+        </svg>
+      </div>
+      <span class="gh-stat-label">Concluídos</span>
+      <span class="gh-stat-value">{{ concluidos or 0 }}</span>
     </div>
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h3>Favoritos</h3>
-                <h2>{{ favoritos }}</h2>
-            </div>
-        </div>
+    <div class="gh-stat">
+      <div class="gh-stat-icon" style="background: rgba(232,98,43,0.10); color: #E8622B;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </div>
+      <span class="gh-stat-label">Favoritos</span>
+      <span class="gh-stat-value">{{ favoritos or 0 }}</span>
     </div>
+
+    <div class="gh-stat">
+      <div class="gh-stat-icon" style="background: rgba(41,121,255,0.10); color: #2979FF;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </div>
+      <span class="gh-stat-label">Jogando</span>
+      <span class="gh-stat-value">{{ jogando or 0 }}</span>
+    </div>
+
+    <div class="gh-stat">
+      <div class="gh-stat-icon" style="background: rgba(255,109,0,0.10); color: #E8622B;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      </div>
+      <span class="gh-stat-label">Quero jogar</span>
+      <span class="gh-stat-value">{{ quero_jogar or 0 }}</span>
+    </div>
+
+    <div class="gh-stat">
+      <div class="gh-stat-icon" style="background: rgba(22,25,28,0.06); color: #16191C;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <span class="gh-stat-label">Avaliações</span>
+      <span class="gh-stat-value">{{ total_avaliacoes or 0 }}</span>
+    </div>
+
+  </section>
+
+  {# ─── Nota média ─── #}
+  <section class="gh-block">
+
+    <div class="gh-block-head" style="margin-bottom: 14px;">
+      <div>
+        <p class="gh-block-tag" style="margin: 0 0 4px;">Média das notas</p>
+        <h2 class="gh-block-title">Minha nota média</h2>
+      </div>
+    </div>
+
+    {% if total_avaliacoes and total_avaliacoes > 0 %}
+
+      <div class="gh-score">
+        <span class="gh-score-num">{{ "%.1f"|format(nota_media) }}</span>
+        <span class="gh-score-den">/ 5</span>
+
+        <span class="gh-stars">
+          {% for i in range(nota_media|round(0, 'floor')|int) %}★{% endfor %}
+        </span>
+      </div>
+
+      <p class="gh-score-note">
+        Baseado em {{ total_avaliacoes }} avaliaç{{ 'ão' if total_avaliacoes == 1 else 'ões' }}.
+      </p>
+
+    {% else %}
+
+      <p class="gh-empty">
+        Você ainda não avaliou nenhum jogo.
+        Quando avaliar, sua média aparece aqui.
+      </p>
+
+    {% endif %}
+
+  </section>
+
+  {# ─── Breakdowns ─── #}
+  {% set max_console = (jogos_por_console | map(attribute=1) | max) if jogos_por_console else 1 %}
+  {% set max_categoria = (jogos_por_categoria | map(attribute=1) | max) if jogos_por_categoria else 1 %}
+
+  <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px;"
+       class="gh-two-col">
+
+    {# Console #}
+    <section class="gh-block" style="margin-top: 0;">
+      <div class="gh-block-head">
+        <h2 class="gh-block-title">Jogos por console</h2>
+        <span class="gh-block-tag">Console</span>
+      </div>
+
+      {% if jogos_por_console %}
+        <ul class="gh-breakdown">
+          {% for console, quantidade in jogos_por_console %}
+            <li class="gh-row">
+              <span class="gh-name">{{ console }}</span>
+              <span class="gh-bar">
+                <span class="gh-fill"
+                      style="width: {{ (quantidade / max_console * 100) | round(1) }}%; background: rgba(41,121,255,0.55);"></span>
+              </span>
+              <span class="gh-count">{{ quantidade }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="gh-empty">Nenhum jogo encontrado.</p>
+      {% endif %}
+    </section>
+
+    {# Categoria #}
+    <section class="gh-block" style="margin-top: 0;">
+      <div class="gh-block-head">
+        <h2 class="gh-block-title">Jogos por categoria</h2>
+        <span class="gh-block-tag">Gênero</span>
+      </div>
+
+      {% if jogos_por_categoria %}
+        <ul class="gh-breakdown">
+          {% for categoria, quantidade in jogos_por_categoria %}
+            <li class="gh-row">
+              <span class="gh-name">{{ categoria }}</span>
+              <span class="gh-bar">
+                <span class="gh-fill"
+                      style="width: {{ (quantidade / max_categoria * 100) | round(1) }}%; background: rgba(0,200,83,0.55);"></span>
+              </span>
+              <span class="gh-count">{{ quantidade }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="gh-empty">Nenhum jogo encontrado.</p>
+      {% endif %}
+    </section>
+
+  </div>
+
+  {# ─── Botão voltar ─── #}
+  <div class="gh-back-wrap">
+    <a href="{{ url_for('index') }}" class="gh-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Voltar para minha biblioteca
+    </a>
+  </div>
 
 </div>
 
-<br>
-
-<div class="row">
-
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h3>Jogando</h3>
-                <h2>{{ jogando }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h3>Quero jogar</h3>
-                <h2>{{ quero_jogar }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h3>Avaliações</h3>
-                <h2>{{ total_avaliacoes }}</h2>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<br>
-
-<div class="card">
-
-    <div class="card-body">
-
-        <h2>Minha nota média</h2>
-
-        {% if total_avaliacoes > 0 %}
-
-            <h1>
-                {{ "%.1f"|format(nota_media) }}/5
-            </h1>
-
-            <p>
-                {% for i in range(nota_media|round(0, 'floor')|int) %}
-                    ⭐
-                {% endfor %}
-            </p>
-
-        {% else %}
-
-            <p>
-                Você ainda não avaliou nenhum jogo.
-            </p>
-
-        {% endif %}
-
-    </div>
-
-</div>
-
-<br>
-
-<div class="row">
-
-    <div class="col-md-6">
-
-        <div class="card">
-
-            <div class="card-body">
-
-                <h2>Jogos por console</h2>
-
-                {% if jogos_por_console %}
-
-                    {% for console, quantidade in jogos_por_console %}
-
-                        <p>
-                            <strong>{{ console }}</strong>
-                            <span class="pull-right">
-                                {{ quantidade }}
-                            </span>
-                        </p>
-
-                        <hr>
-
-                    {% endfor %}
-
-                {% else %}
-
-                    <p>
-                        Nenhum jogo encontrado.
-                    </p>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-6">
-
-        <div class="card">
-
-            <div class="card-body">
-
-                <h2>Jogos por categoria</h2>
-
-                {% if jogos_por_categoria %}
-
-                    {% for categoria, quantidade in jogos_por_categoria %}
-
-                        <p>
-                            <strong>{{ categoria }}</strong>
-                            <span class="pull-right">
-                                {{ quantidade }}
-                            </span>
-                        </p>
-
-                        <hr>
-
-                    {% endfor %}
-
-                {% else %}
-
-                    <p>
-                        Nenhum jogo encontrado.
-                    </p>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-<br>
-
-<a
-    href="{{ url_for('index') }}"
-    class="btn btn-secondary">
-
-    Voltar para minha biblioteca
-
-</a>
-```
-
-</div>
+<style>
+  /* Duas colunas nos breakdowns a partir de 900px */
+  @media (min-width: 900px) {
+    .gh-two-col { grid-template-columns: 1fr 1fr !important; }
+  }
+</style>
 
 {% endblock %}

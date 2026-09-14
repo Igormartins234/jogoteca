@@ -1,75 +1,480 @@
 {% extends "template.html" %}
 {% block conteudo %}
 
-<div class="card">
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     Adicionar jogo · escopo local (prefixo .nj-)
+     ═══════════════════════════════════════════════════════════ */
 
-    <div class="card-body">
+  .nj-wrap {
+    max-width: 560px;
+    margin: 0 auto;
+  }
 
-        <h2>Adicionar jogo ao catálogo</h2>
+  /* ═══ Cabeçalho ═══ */
+  .nj-head { margin-bottom: 26px; }
 
-        <p>
-            Adicione um jogo que ainda não existe no GameHub.
-        </p>
+  .nj-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: #00A850;
+    margin: 0 0 6px;
+  }
 
-        <form
-            method="POST"
-            action="{{ url_for('criar') }}"
-            enctype="multipart/form-data">
+  .nj-title {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.85rem;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #16191C;
+    margin: 0;
+  }
 
-            {{ form.csrf_token }}
+  .nj-sub {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(22,25,28,0.52);
+  }
 
-            <div class="form-group">
+  /* ═══ Cartão ═══ */
+  .nj-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(22,25,28,0.06);
+    border-radius: 18px;
+    padding: 28px 26px;
+    box-shadow:
+      0 1px 2px rgba(22,25,28,0.03),
+      0 20px 44px -28px rgba(22,25,28,0.12);
+  }
+  @media (max-width: 560px) {
+    .nj-card { padding: 22px 18px; border-radius: 16px; }
+  }
 
-                {{ form.nome.label }}
+  /* ═══ Campos ═══ */
+  .nj-field { margin-bottom: 16px; }
 
-                {{ form.nome(class="form-control") }}
+  .nj-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(22,25,28,0.48);
+    margin: 0 0 7px 2px;
+  }
 
-            </div>
+  .nj-input,
+  .nj-select {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: #16191C;
+    background-color: #F5F3EF;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    outline: none;
+    transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+    -webkit-appearance: none;
+            appearance: none;
+  }
 
-            <div class="form-group">
+  .nj-input::placeholder { color: rgba(22,25,28,0.32); }
 
-                {{ form.categoria.label }}
+  .nj-input:hover,
+  .nj-select:hover { background-color: #F0EEE9; }
 
-                {{ form.categoria(class="form-control") }}
+  .nj-input:focus,
+  .nj-select:focus {
+    background-color: #FFFFFF;
+    border-color: #00C853;
+    box-shadow: 0 0 0 4px rgba(0,200,83,0.12);
+  }
 
-            </div>
+  .nj-input.is-invalid {
+    background-color: #FFF6F1;
+    border-color: #E8622B;
+  }
+  .nj-input.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(232,98,43,0.12);
+  }
 
-            <div class="form-group">
+  /* ─── Grid de dois campos ─── */
+  .nj-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 520px) {
+    .nj-row { grid-template-columns: 1fr; gap: 0; }
+    .nj-row .nj-field { margin-bottom: 16px; }
+  }
 
-                {{ form.console.label }}
+  /* ═══ Upload de capa ═══ */
+  .nj-upload {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background-color: #F5F3EF;
+    border: 1.5px dashed rgba(22,25,28,0.14);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background-color .25s ease, border-color .25s ease;
+  }
+  .nj-upload:hover {
+    background-color: #F0EEE9;
+    border-color: rgba(0,200,83,0.35);
+  }
+  .nj-upload.is-dragover {
+    background-color: rgba(0,200,83,0.06);
+    border-color: #00C853;
+    border-style: solid;
+  }
+  .nj-upload.has-file {
+    border-style: solid;
+    border-color: rgba(0,200,83,0.35);
+    background-color: rgba(0,200,83,0.04);
+  }
 
-                {{ form.console(class="form-control") }}
+  .nj-upload input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
 
-            </div>
+  .nj-upload-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #FFFFFF;
+    color: #00A850;
+    box-shadow: 0 1px 2px rgba(22,25,28,0.04);
+    transition: transform .3s ease;
+  }
+  .nj-upload:hover .nj-upload-icon { transform: translateY(-1px); }
 
-            <div class="form-group">
+  .nj-upload-body { flex: 1; min-width: 0; }
 
-                <label for="arquivo">
-                    Capa do jogo
-                </label>
+  .nj-upload-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #16191C;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-                <input
-                    type="file"
-                    name="arquivo"
-                    id="arquivo"
-                    class="form-control">
+  .nj-upload-hint {
+    font-size: 12px;
+    color: rgba(22,25,28,0.42);
+    margin: 0;
+  }
 
-            </div>
+  .nj-upload-preview {
+    flex-shrink: 0;
+    width: 40px;
+    height: 56px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #E5E3DD;
+    display: none;
+    box-shadow: 0 2px 6px rgba(22,25,28,0.10);
+  }
+  .nj-upload.has-file .nj-upload-preview { display: block; }
 
-            {{ form.salvar(class="btn btn-primary") }}
+  .nj-upload-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
 
-            <a
-                href="{{ url_for('index') }}"
-                class="btn btn-secondary">
+  /* ═══ Ações ═══ */
+  .nj-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(22,25,28,0.07);
+  }
+  @media (max-width: 480px) {
+    .nj-actions { flex-direction: column-reverse; align-items: stretch; }
+  }
 
-                Cancelar
+  .nj-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 44px;
+    padding: 0 22px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border: 0;
+    border-radius: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background .3s ease, color .3s ease, border-color .3s ease,
+                transform .3s ease, box-shadow .3s ease;
+  }
+  .nj-btn:active { transform: translateY(1px); }
 
-            </a>
+  .nj-btn--primary {
+    background: #16191C;
+    color: #FBFAF7;
+    flex: 1;
+  }
+  .nj-btn--primary:hover {
+    background: #00A850;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -12px rgba(0,168,80,0.55);
+  }
 
-        </form>
+  .nj-btn--ghost {
+    background: transparent;
+    color: rgba(22,25,28,0.55);
+    border: 1px solid rgba(22,25,28,0.10);
+  }
+  .nj-btn--ghost:hover {
+    color: #16191C;
+    background: rgba(22,25,28,0.03);
+    border-color: rgba(22,25,28,0.16);
+  }
 
-    </div>
+  @media (max-width: 480px) {
+    .nj-btn { width: 100%; }
+    .nj-btn--primary { flex: 0 0 auto; }
+  }
+
+  /* ═══ Reduced motion ═══ */
+  @media (prefers-reduced-motion: reduce) {
+    .nj-input, .nj-select, .nj-upload, .nj-upload-icon, .nj-btn {
+      transition: none !important;
+    }
+    .nj-btn:hover, .nj-upload:hover .nj-upload-icon { transform: none !important; }
+  }
+</style>
+
+<div class="nj-wrap">
+
+  {# ═══════════════ CABEÇALHO ═══════════════ #}
+  <header class="nj-head">
+    <p class="nj-eyebrow">Catálogo</p>
+    <h1 class="nj-title">Adicionar jogo</h1>
+    <p class="nj-sub">
+      Adicione um jogo que ainda não existe no GameHub.
+    </p>
+  </header>
+
+  {# ═══════════════ CARTÃO ═══════════════ #}
+  <div class="nj-card">
+
+    <form method="POST"
+          action="{{ url_for('criar') }}"
+          enctype="multipart/form-data"
+          id="nj-form"
+          novalidate>
+
+      {{ form.csrf_token() }}
+
+      {# ─── Nome ─── #}
+      <div class="nj-field">
+        {{ form.nome.label(class="nj-label") }}
+        {{ form.nome(
+            class="nj-input",
+            placeholder="Ex: Hollow Knight",
+            autocomplete="off",
+            autofocus=true,
+            **{"data-validate": "required"}
+        ) }}
+      </div>
+
+      {# ─── Categoria + Console ─── #}
+      <div class="nj-row">
+
+        <div class="nj-field">
+          {{ form.categoria.label(class="nj-label") }}
+          {{ form.categoria(
+              class="nj-input",
+              placeholder="Ex: Metroidvania",
+              autocomplete="off",
+              **{"data-validate": "required"}
+          ) }}
+        </div>
+
+        <div class="nj-field">
+          {{ form.console.label(class="nj-label") }}
+          {{ form.console(
+              class="nj-input",
+              placeholder="Ex: PC, PS5, Switch",
+              autocomplete="off",
+              **{"data-validate": "required"}
+          ) }}
+        </div>
+
+      </div>
+
+      {# ─── Capa ─── #}
+      <div class="nj-field">
+
+        <label class="nj-label" for="arquivo">Capa do jogo</label>
+
+        <label class="nj-upload" for="arquivo" id="nj-upload">
+
+          <input type="file"
+                 name="arquivo"
+                 id="arquivo"
+                 accept="image/png, image/jpeg, image/webp, image/gif">
+
+          <span class="nj-upload-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </span>
+
+          <span class="nj-upload-body">
+            <span class="nj-upload-title" id="nj-upload-title">
+              Escolha uma imagem
+            </span>
+            <span class="nj-upload-hint" id="nj-upload-hint">
+              PNG, JPG ou WEBP · recomendado 2:3
+            </span>
+          </span>
+
+          <span class="nj-upload-preview" id="nj-upload-preview" aria-hidden="true"></span>
+
+        </label>
+
+      </div>
+
+      {# ─── Ações ─── #}
+      <div class="nj-actions">
+
+        <a href="{{ url_for('index') }}" class="nj-btn nj-btn--ghost">
+          Cancelar
+        </a>
+
+        {{ form.salvar(
+            class="nj-btn nj-btn--primary",
+            **{"data-label": "Adicionar ao catálogo"}
+        ) }}
+
+      </div>
+
+    </form>
+
+  </div>
 
 </div>
+
+<script>
+  (function () {
+    var upload   = document.getElementById('nj-upload');
+    var input    = document.getElementById('arquivo');
+    var title    = document.getElementById('nj-upload-title');
+    var hint     = document.getElementById('nj-upload-hint');
+    var preview  = document.getElementById('nj-upload-preview');
+    if (!upload || !input) return;
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function setFile(file) {
+      if (!file) {
+        upload.classList.remove('has-file');
+        title.textContent = 'Escolha uma imagem';
+        hint.textContent  = 'PNG, JPG ou WEBP · recomendado 2:3';
+        preview.innerHTML = '';
+        return;
+      }
+
+      upload.classList.add('has-file');
+      title.textContent = file.name;
+      hint.textContent  = formatSize(file.size);
+
+      if (file.type.startsWith('image/')) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          preview.innerHTML = '<img src="' + e.target.result + '" alt="">';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    input.addEventListener('change', function () {
+      setFile(this.files && this.files[0]);
+    });
+
+    ['dragenter', 'dragover'].forEach(function (ev) {
+      upload.addEventListener(ev, function (e) {
+        e.preventDefault();
+        upload.classList.add('is-dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(function (ev) {
+      upload.addEventListener(ev, function (e) {
+        e.preventDefault();
+        if (ev === 'dragleave' && upload.contains(e.relatedTarget)) return;
+        upload.classList.remove('is-dragover');
+      });
+    });
+
+    upload.addEventListener('drop', function (e) {
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files.length) {
+        input.files = files;
+        setFile(files[0]);
+      }
+    });
+
+    /* ─── Validação simples ─── */
+    var form = document.getElementById('nj-form');
+    var fields = form.querySelectorAll('[data-validate="required"]');
+
+    fields.forEach(function (el) {
+      el.addEventListener('input', function () {
+        if (el.value.trim()) el.classList.remove('is-invalid');
+      });
+    });
+
+    form.addEventListener('submit', function (e) {
+      var ok = true;
+      fields.forEach(function (el) {
+        if (!el.value.trim()) {
+          el.classList.add('is-invalid');
+          if (ok) el.focus();
+          ok = false;
+        }
+      });
+      if (!ok) e.preventDefault();
+    });
+  })();
+</script>
 
 {% endblock %}

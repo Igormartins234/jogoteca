@@ -1,7 +1,8 @@
 import os
 from jogoteca import app
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, SelectField, BooleanField, TextAreaField, validators
+from wtforms import StringField, SubmitField, PasswordField, SelectField, BooleanField, TextAreaField, validators, IntegerField
+from wtforms.validators import DataRequired, NumberRange
 
 
 class FormularioJogo(FlaskForm):
@@ -53,7 +54,7 @@ class FormularioAvaliacao(FlaskForm):
 
 
 class FormularioAvaliacao(FlaskForm):
-    nota = StringField('Nota', [validators.DataRequired()])
+    nota = IntegerField('Nota',validators=[DataRequired(),NumberRange(min=1, max=5)])
     review = StringField('Review', [validators.DataRequired(), validators.Length(min=1, max=1000)])
     salvar = SubmitField('Publicar avaliação')
 
