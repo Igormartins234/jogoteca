@@ -1,7 +1,7 @@
 from jogoteca import app, db
 from flask import render_template, request, redirect, session, flash, url_for
 from models import Usuarios, Biblioteca, Avaliacoes
-from helpers import FormularioUsuario, FormularioCadastro
+from helpers import FormularioUsuario, FormularioCadastro, recupera_imagem
 from flask_bcrypt import check_password_hash, generate_password_hash
 
 
@@ -89,6 +89,8 @@ def perfil(nickname):
     favoritos = Biblioteca.query.filter_by(
         usuario_id=usuario.id,
         favorito=True
+    ).order_by(
+        Biblioteca.id.desc()
     ).all()
 
     concluidos = Biblioteca.query.filter_by(
@@ -96,16 +98,26 @@ def perfil(nickname):
         status='concluido'
     ).count()
 
+    capas_biblioteca = {}
+
+    for item in biblioteca:
+        capas_biblioteca[item.jogo.id] = recupera_imagem(item.jogo.id)
+
+    capas_favoritos = {}
+
+    for item in favoritos:
+        capas_favoritos[item.jogo.id] = recupera_imagem(item.jogo.id)
+
     return render_template(
         'perfil.html',
         titulo=usuario.nome,
         usuario=usuario,
         biblioteca=biblioteca,
         favoritos=favoritos,
-        concluidos=concluidos
+        concluidos=concluidos,
+        capas_biblioteca=capas_biblioteca,
+        capas_favoritos=capas_favoritos
     )
-
-
 
 @app.route('/logout')
 def logout():
