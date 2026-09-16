@@ -15,6 +15,9 @@ Jinja2==3.1.6
 MarkupSafe==3.0.3
 mysql-connector-python==8.0.28
 protobuf==7.36.1
+psycopg==3.3.5
+psycopg-binary==3.3.5
+psycopg2-binary==2.9.13
 python-dotenv==1.2.3
 requests==2.34.2
 SQLAlchemy==2.0.52
