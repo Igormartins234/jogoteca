@@ -15,4 +15,5 @@ SQLALCHEMY_DATABASE_URI = URL.create(
     database=os.getenv('DB_NAME')
 )
 
+
 UPLOAD_PATH = os.path.dirname(os.path.abspath(__file__)) + '/uploads'
